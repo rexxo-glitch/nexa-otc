@@ -139,6 +139,36 @@ td { padding: 14px 16px; font-size: 13px; vertical-align: middle; }
       <div class="stat-card"><div class="stat-label">Cancelled</div><div class="stat-val red" id="s-cancelled">—</div></div>
     </div>
 
+    <!-- RATE EDITOR -->
+    <div class="section-hdr" style="margin-top:32px;">
+      <div class="section-title">USDT Rate Control</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:32px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;font-weight:700;">
+          <input type="checkbox" id="useCustomRates" onchange="toggleCustomRates()" style="width:18px;height:18px;accent-color:var(--primary);" />
+          Use my custom rates (override live market price)
+        </label>
+        <span id="rateStatusBadge" style="font-size:11px;padding:3px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-weight:700;background:rgba(107,114,128,0.15);color:var(--muted);border:1px solid rgba(107,114,128,0.2);">MARKET RATE</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:16px;align-items:end;" id="rateInputs">
+        <div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'JetBrains Mono',monospace;margin-bottom:6px;">BUY RATE (ETB per 1 USDT)</div>
+          <input id="rateUsdtBuy" type="number" placeholder="e.g. 184" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:14px 16px;color:var(--primary);font-family:'Orbitron',monospace;font-size:20px;font-weight:700;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" />
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Customer pays this to buy USDT</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'JetBrains Mono',monospace;margin-bottom:6px;">SELL RATE (ETB per 1 USDT)</div>
+          <input id="rateUsdtSell" type="number" placeholder="e.g. 182" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:14px 16px;color:var(--danger);font-family:'Orbitron',monospace;font-size:20px;font-weight:700;outline:none;" onfocus="this.style.borderColor='var(--danger)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" />
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Customer receives this when selling USDT</div>
+        </div>
+        <button onclick="saveRates()" style="background:linear-gradient(135deg,var(--primary),var(--secondary));color:#000;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;padding:14px 28px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;">💾 Save Rates</button>
+      </div>
+      <div style="margin-top:14px;font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">
+        💡 BTC, ETH, BNB always use live market prices. Only USDT/ETB rate is customizable.
+      </div>
+    </div>
+
     <!-- ORDERS TABLE -->
     <div class="section-hdr">
       <div class="section-title">All Orders</div>
@@ -192,6 +222,7 @@ function doLogin() {
         document.getElementById('loginWrap').style.display = 'none';
         document.getElementById('adminWrap').style.display = 'block';
         loadAll();
+        loadRates();
       } else {
         document.getElementById('loginErr').style.display = 'block';
       }
@@ -320,6 +351,68 @@ function showToast(msg, type) {
   t.textContent = msg;
   t.className = `toast ${type} show`;
   setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── RATES ──
+async function loadRates() {
+  try {
+    const r = await fetch('/api/admin/rates', { headers: { 'x-admin-password': adminPw } });
+    const d = await r.json();
+    if (d.ok && d.rates) {
+      document.getElementById('rateUsdtBuy').value  = d.rates.usdtBuy  || '';
+      document.getElementById('rateUsdtSell').value = d.rates.usdtSell || '';
+      document.getElementById('useCustomRates').checked = !!d.rates.useCustom;
+      updateRateBadge(!!d.rates.useCustom);
+    }
+  } catch(e) {}
+}
+
+function toggleCustomRates() {
+  const on = document.getElementById('useCustomRates').checked;
+  updateRateBadge(on);
+}
+
+function updateRateBadge(on) {
+  const badge = document.getElementById('rateStatusBadge');
+  if (on) {
+    badge.textContent = '✅ CUSTOM RATE ACTIVE';
+    badge.style.background = 'rgba(0,255,153,0.12)';
+    badge.style.color = 'var(--primary)';
+    badge.style.borderColor = 'rgba(0,255,153,0.25)';
+  } else {
+    badge.textContent = 'MARKET RATE';
+    badge.style.background = 'rgba(107,114,128,0.15)';
+    badge.style.color = 'var(--muted)';
+    badge.style.borderColor = 'rgba(107,114,128,0.2)';
+  }
+}
+
+async function saveRates() {
+  const buy  = parseFloat(document.getElementById('rateUsdtBuy').value);
+  const sell = parseFloat(document.getElementById('rateUsdtSell').value);
+  const useCustom = document.getElementById('useCustomRates').checked;
+
+  if (useCustom && (!buy || !sell)) {
+    showToast('⚠ Enter both buy and sell rates first', 'err');
+    return;
+  }
+  if (useCustom && sell >= buy) {
+    showToast('⚠ Sell rate must be lower than buy rate', 'err');
+    return;
+  }
+
+  const r = await fetch('/api/admin/rates', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPw },
+    body: JSON.stringify({ usdtBuy: buy, usdtSell: sell, useCustom })
+  });
+  const d = await r.json();
+  if (d.ok) {
+    showToast(useCustom ? `✅ Rate set! Buy: ${buy} ETB · Sell: ${sell} ETB` : '✅ Switched back to market rate', 'ok');
+    updateRateBadge(useCustom);
+  } else {
+    showToast('❌ Failed to save rates', 'err');
+  }
 }
 
 // Auto-refresh every 60 seconds

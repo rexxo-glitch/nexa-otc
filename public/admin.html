@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEXA OTC — Admin Panel</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230B0F17'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='monospace' font-weight='bold' font-size='20' fill='%2300FF99'%3EN%3C/text%3E%3C/svg%3E" />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Syne:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #0B0F17; --bg2: #0E1420; --bg3: #131925;
+  --primary: #00FF99; --secondary: #00C2FF;
+  --danger: #FF4D4D; --warn: #FFB800;
+  --text: #E5E7EB; --muted: #6B7280;
+  --border: rgba(0,255,153,0.12); --glass: rgba(255,255,255,0.03);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; }
+body::after { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0,255,153,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,153,0.02) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; z-index: 0; }
+
+/* LOGIN */
+.login-wrap { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; }
+.login-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; padding: 48px 40px; width: 380px; text-align: center; }
+.login-logo { font-family: 'Orbitron', monospace; font-weight: 900; font-size: 24px; letter-spacing: 4px; color: var(--primary); margin-bottom: 6px; }
+.login-sub { color: var(--muted); font-size: 13px; margin-bottom: 32px; font-family: 'JetBrains Mono', monospace; }
+.login-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 14px 16px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 15px; outline: none; text-align: center; letter-spacing: 2px; margin-bottom: 14px; transition: border-color 0.2s; }
+.login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,255,153,0.1); }
+.login-btn { width: 100%; background: linear-gradient(135deg, var(--primary), #00C2FF); color: #000; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; padding: 14px; border-radius: 10px; border: none; cursor: pointer; }
+.login-err { color: var(--danger); font-size: 12px; margin-top: 10px; font-family: 'JetBrains Mono', monospace; display: none; }
+
+/* MAIN LAYOUT */
+.admin-wrap { display: none; position: relative; z-index: 1; }
+.top-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 28px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.top-logo { font-family: 'Orbitron', monospace; font-weight: 900; font-size: 16px; letter-spacing: 3px; color: var(--primary); }
+.top-right { display: flex; gap: 12px; align-items: center; }
+.top-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 7px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+.top-btn:hover { background: rgba(255,255,255,0.1); }
+.top-btn.logout { color: var(--danger); border-color: rgba(255,77,77,0.25); }
+
+.content { max-width: 1300px; margin: 0 auto; padding: 32px 24px; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 32px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+.stat-label { font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; }
+.stat-val { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 26px; color: var(--text); }
+.stat-val.green { color: var(--primary); } .stat-val.red { color: var(--danger); } .stat-val.yellow { color: var(--warn); } .stat-val.blue { color: var(--secondary); }
+
+/* TOOLBAR */
+.toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-btn { background: var(--bg2); border: 1px solid rgba(255,255,255,0.08); color: var(--muted); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover, .filter-btn.active { color: var(--text); border-color: rgba(0,255,153,0.3); background: rgba(0,255,153,0.06); }
+.search-input { flex: 1; min-width: 180px; background: var(--bg2); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 14px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; }
+.search-input:focus { border-color: rgba(0,255,153,0.3); }
+.refresh-btn { background: rgba(0,255,153,0.1); border: 1px solid rgba(0,255,153,0.25); color: var(--primary); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+.refresh-btn:hover { background: rgba(0,255,153,0.18); }
+
+/* TABLE */
+.table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead th { background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); padding: 12px 16px; text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+td { padding: 14px 16px; font-size: 13px; vertical-align: middle; }
+
+/* BADGES */
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
+.badge-buy  { background: rgba(0,255,153,0.12); color: var(--primary); border: 1px solid rgba(0,255,153,0.2); }
+.badge-sell { background: rgba(255,77,77,0.1);  color: var(--danger);  border: 1px solid rgba(255,77,77,0.2); }
+.badge-pending   { background: rgba(255,184,0,0.12);  color: var(--warn);      border: 1px solid rgba(255,184,0,0.25); }
+.badge-confirmed { background: rgba(0,194,255,0.1);   color: var(--secondary); border: 1px solid rgba(0,194,255,0.25); }
+.badge-completed { background: rgba(0,255,153,0.12);  color: var(--primary);   border: 1px solid rgba(0,255,153,0.25); }
+.badge-cancelled { background: rgba(107,114,128,0.12);color: var(--muted);     border: 1px solid rgba(107,114,128,0.2); }
+
+/* ACTION BUTTONS */
+.act-btn { font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-family: 'Syne', sans-serif; border: none; transition: all 0.15s; }
+.act-confirm  { background: rgba(0,194,255,0.12); color: var(--secondary); border: 1px solid rgba(0,194,255,0.25); }
+.act-complete { background: rgba(0,255,153,0.12); color: var(--primary);   border: 1px solid rgba(0,255,153,0.25); }
+.act-cancel   { background: rgba(255,77,77,0.1);  color: var(--danger);    border: 1px solid rgba(255,77,77,0.2); }
+.act-delete   { background: rgba(107,114,128,0.1);color: var(--muted);     border: 1px solid rgba(107,114,128,0.2); }
+.act-btn:hover { opacity: 0.8; transform: translateY(-1px); }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 64px 20px; color: var(--muted); }
+.empty .icon { font-size: 48px; margin-bottom: 12px; }
+.empty p { font-size: 14px; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; font-size: 13px; font-weight: 600; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok { border-color: rgba(0,255,153,0.3); color: var(--primary); }
+.toast.err { border-color: rgba(255,77,77,0.3); color: var(--danger); }
+
+/* SECTION TITLE */
+.section-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.section-title { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+.section-title::before { content: ''; display: block; width: 3px; height: 16px; background: linear-gradient(180deg, var(--primary), var(--secondary)); border-radius: 2px; }
+
+@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr 1fr; } table { display: block; overflow-x: auto; } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <div class="login-logo">NEXA OTC</div>
+    <div class="login-sub">Admin Panel — Restricted Access</div>
+    <input class="login-input" type="password" id="pwInput" placeholder="••••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="login-btn" onclick="doLogin()">🔐 Access Admin Panel</button>
+    <div class="login-err" id="loginErr">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-wrap" id="adminWrap">
+  <div class="top-bar">
+    <div class="top-logo">NEXA OTC — ADMIN</div>
+    <div class="top-right">
+      <a href="/" class="top-btn">← Back to Site</a>
+      <a href="https://t.me/crypton_r" target="_blank" class="top-btn">📱 Telegram</a>
+      <button class="top-btn logout" onclick="logout()">Log Out</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- STATS -->
+    <div class="section-hdr">
+      <div class="section-title">Dashboard</div>
+      <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;" id="lastRefreshed">Loading…</div>
+    </div>
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-val" id="s-total">—</div></div>
+      <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-val yellow" id="s-pending">—</div></div>
+      <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-val blue" id="s-confirmed">—</div></div>
+      <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-val green" id="s-completed">—</div></div>
+      <div class="stat-card"><div class="stat-label">Cancelled</div><div class="stat-val red" id="s-cancelled">—</div></div>
+    </div>
+
+    <!-- ORDERS TABLE -->
+    <div class="section-hdr">
+      <div class="section-title">All Orders</div>
+    </div>
+    <div class="toolbar">
+      <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-btn" onclick="setFilter('pending', this)">⏳ Pending</button>
+      <button class="filter-btn" onclick="setFilter('confirmed', this)">✅ Confirmed</button>
+      <button class="filter-btn" onclick="setFilter('completed', this)">🏆 Completed</button>
+      <button class="filter-btn" onclick="setFilter('cancelled', this)">❌ Cancelled</button>
+      <input class="search-input" id="searchInput" placeholder="Search by name, phone, asset…" oninput="renderOrders()" />
+      <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Asset</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Rate</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let adminPw = '';
+let allOrders = [];
+let currentFilter = 'all';
+
+// ── AUTH ──
+function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  fetch('/api/admin/stats', { headers: { 'x-admin-password': pw } })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        adminPw = pw;
+        document.getElementById('loginWrap').style.display = 'none';
+        document.getElementById('adminWrap').style.display = 'block';
+        loadAll();
+      } else {
+        document.getElementById('loginErr').style.display = 'block';
+      }
+    })
+    .catch(() => { document.getElementById('loginErr').style.display = 'block'; });
+}
+
+function logout() {
+  adminPw = '';
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('adminWrap').style.display = 'none';
+  document.getElementById('pwInput').value = '';
+}
+
+// ── DATA ──
+async function loadAll() {
+  await Promise.all([loadStats(), loadOrders()]);
+}
+
+async function loadStats() {
+  const r = await fetch('/api/admin/stats', { headers: { 'x-admin-password': adminPw } });
+  const d = await r.json();
+  if (!d.ok) return;
+  const s = d.stats;
+  document.getElementById('s-total').textContent     = s.total;
+  document.getElementById('s-pending').textContent   = s.pending;
+  document.getElementById('s-confirmed').textContent = s.confirmed;
+  document.getElementById('s-completed').textContent = s.completed;
+  document.getElementById('s-cancelled').textContent = s.cancelled;
+  document.getElementById('lastRefreshed').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+}
+
+async function loadOrders() {
+  const r = await fetch('/api/admin/orders', { headers: { 'x-admin-password': adminPw } });
+  const d = await r.json();
+  if (!d.ok) return;
+  allOrders = d.orders;
+  renderOrders();
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrders();
+}
+
+function renderOrders() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = allOrders.filter(o => {
+    if (currentFilter !== 'all' && o.status !== currentFilter) return false;
+    if (q && !`${o.name} ${o.phone} ${o.asset} ${o.id}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('ordersBody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty"><div class="icon">📭</div><p>No orders found</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(o => {
+    const dt = new Date(o.createdAt).toLocaleString('en-ET', { timeZone: 'Africa/Addis_Ababa', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);">${o.id}</td>
+      <td>
+        <div style="font-weight:700;">${esc(o.name)}</div>
+        <div style="font-size:11px;color:var(--primary);font-family:'JetBrains Mono',monospace;">${esc(o.phone)}</div>
+        ${o.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${esc(o.notes)}</div>` : ''}
+      </td>
+      <td style="font-family:'Orbitron',monospace;font-weight:700;font-size:13px;">${o.asset}</td>
+      <td><span class="badge badge-${o.type}">${o.type === 'buy' ? '🟢 BUY' : '🔴 SELL'}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;">${o.amount} ${o.asset}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">${o.rate} ${o.unit}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text);">${o.total.toLocaleString()} ${o.unit}</td>
+      <td><span class="badge badge-${o.status}">${statusLabel(o.status)}</span></td>
+      <td style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;">${dt}</td>
+      <td>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          ${o.status === 'pending'   ? `<button class="act-btn act-confirm"  onclick="updateStatus('${o.id}','confirmed')">Confirm</button>` : ''}
+          ${o.status === 'confirmed' ? `<button class="act-btn act-complete" onclick="updateStatus('${o.id}','completed')">Complete</button>` : ''}
+          ${o.status !== 'cancelled' && o.status !== 'completed' ? `<button class="act-btn act-cancel" onclick="updateStatus('${o.id}','cancelled')">Cancel</button>` : ''}
+          <button class="act-btn act-delete" onclick="deleteOrder('${o.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function statusLabel(s) {
+  return { pending:'⏳ Pending', confirmed:'✅ Confirmed', completed:'🏆 Done', cancelled:'❌ Cancelled' }[s] || s;
+}
+
+function esc(t) {
+  return String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function updateStatus(id, status) {
+  const r = await fetch(`/api/admin/orders/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPw },
+    body: JSON.stringify({ status })
+  });
+  const d = await r.json();
+  if (d.ok) {
+    showToast('✅ Order updated to ' + status, 'ok');
+    loadAll();
+  } else {
+    showToast('❌ Update failed', 'err');
+  }
+}
+
+async function deleteOrder(id) {
+  if (!confirm('Delete this order? This cannot be undone.')) return;
+  const r = await fetch(`/api/admin/orders/${id}`, {
+    method: 'DELETE',
+    headers: { 'x-admin-password': adminPw }
+  });
+  const d = await r.json();
+  if (d.ok) { showToast('🗑 Order deleted', 'ok'); loadAll(); }
+  else showToast('❌ Delete failed', 'err');
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Auto-refresh every 60 seconds
+setInterval(() => { if (adminPw) loadAll(); }, 60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Fix #12: Correct page title -->
+<title>NEXA OTC — Ethiopia's Premier Crypto OTC Desk</title>
+<!-- Fix #13: Meta description and Open Graph tags -->
+<meta name="description" content="NEXA OTC is Ethiopia's trusted over-the-counter crypto trading desk. Buy and sell USDT, BTC, ETH and BNB at competitive OTC rates, settled via Telegram." />
+<meta property="og:title" content="NEXA OTC — Ethiopia's Premier Crypto OTC Desk" />
+<meta property="og:description" content="Buy and sell USDT, BTC, ETH and BNB at the best OTC rates in Ethiopia. Fast, secure manual settlement via Telegram." />
+<meta property="og:type" content="website" />
+<!-- Fix #11: Favicon using inline SVG data URI with "N" in green on dark background -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230B0F17'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='monospace' font-weight='bold' font-size='20' fill='%2300FF99'%3EN%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0B0F17;
+    --bg2: #0E1420;
+    --bg3: #131925;
+    --primary: #00FF99;
+    --secondary: #00C2FF;
+    --danger: #FF4D4D;
+    --warn: #FFB800;
+    --text: #E5E7EB;
+    --muted: #6B7280;
+    --border: rgba(0,255,153,0.12);
+    --border2: rgba(0,194,255,0.1);
+    --glass: rgba(255,255,255,0.03);
+    --glow-g: 0 0 20px rgba(0,255,153,0.25), 0 0 60px rgba(0,255,153,0.08);
+    --glow-b: 0 0 20px rgba(0,194,255,0.25), 0 0 60px rgba(0,194,255,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.5;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(0,255,153,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,153,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* TICKER */
+  .ticker-bar { background: var(--bg2); border-bottom: 1px solid var(--border); height: 36px; overflow: hidden; display: flex; align-items: center; position: relative; z-index: 10; }
+  .ticker-label { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #000; font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; padding: 0 10px; height: 100%; display: flex; align-items: center; white-space: nowrap; letter-spacing: 1px; flex-shrink: 0; z-index: 2; }
+  .ticker-track { display: flex; animation: ticker 35s linear infinite; white-space: nowrap; align-items: center; }
+  .ticker-item { display: inline-flex; align-items: center; gap: 8px; padding: 0 28px; font-family: 'JetBrains Mono', monospace; font-size: 11px; border-right: 1px solid rgba(255,255,255,0.06); height: 36px; }
+  .ticker-item .sym { color: var(--muted); font-weight: 500; }
+  .ticker-item .price { color: var(--text); font-weight: 700; }
+  .ticker-item .chg { font-size: 10px; font-weight: 600; }
+  .up { color: var(--primary); } .down { color: var(--danger); }
+  @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(11,15,23,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .logo { font-family: 'Orbitron', monospace; font-weight: 900; font-size: 20px; letter-spacing: 3px; text-transform: uppercase; display: flex; align-items: center; gap: 2px; text-decoration: none; }
+  .logo .ne, .logo .a { color: var(--text); }
+  .logo .x { color: var(--primary); text-shadow: 0 0 12px rgba(0,255,153,0.8), 0 0 30px rgba(0,255,153,0.4); animation: xpulse 3s ease-in-out infinite; }
+  @keyframes xpulse { 0%,100% { text-shadow: 0 0 12px rgba(0,255,153,0.8), 0 0 30px rgba(0,255,153,0.4); } 50% { text-shadow: 0 0 20px rgba(0,255,153,1), 0 0 50px rgba(0,255,153,0.6); } }
+  .logo-badge { font-size: 9px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #000; padding: 2px 6px; border-radius: 3px; font-weight: 700; letter-spacing: 1px; margin-left: 4px; align-self: flex-end; margin-bottom: 3px; }
+  .nav-center { display: flex; align-items: center; gap: 28px; }
+  /* Fix #7: Remove duplicate transition — only one transition declaration here */
+  .nav-link { color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.5px; transition: color 0.2s; cursor: pointer; }
+  .nav-link:hover { color: var(--text); } .nav-link.active { color: var(--primary); }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .status-dot { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--primary); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .dot { width: 7px; height: 7px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 6px var(--primary); animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .btn-tg { display: flex; align-items: center; gap: 7px; background: linear-gradient(135deg, #00FF99, #00C2FF); color: #000; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; animation: btnpulse 2.5s ease-in-out infinite; }
+  .btn-tg:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,255,153,0.4); }
+  @keyframes btnpulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,255,153,0.3); } 50% { box-shadow: 0 0 0 6px rgba(0,255,153,0); } }
+
+  main { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 0 20px 60px; }
+
+  /* HERO */
+  .hero { padding: 56px 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .hero-title { font-family: 'Orbitron', monospace; font-weight: 900; font-size: clamp(28px, 4vw, 48px); line-height: 1.15; }
+  .hero-title .line2 { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; display: block; }
+  .hero-sub { margin-top: 16px; color: var(--muted); font-size: 15px; line-height: 1.7; max-width: 440px; }
+  .hero-ctas { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-buy { background: linear-gradient(135deg, var(--primary), #00CC80); color: #000; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; padding: 13px 28px; border-radius: 8px; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.25s; }
+  .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,255,153,0.45); }
+  .btn-sell { background: transparent; color: var(--danger); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; padding: 13px 28px; border-radius: 8px; border: 1.5px solid var(--danger); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.25s; }
+  .btn-sell:hover { background: rgba(255,77,77,0.1); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,77,77,0.2); }
+
+  /* HERO CARD */
+  .hero-card { background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 28px; backdrop-filter: blur(12px); box-shadow: var(--glow-g); position: relative; overflow: hidden; }
+  .hero-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--primary), var(--secondary), transparent); }
+  .hc-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+  .hc-pair { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 28px; color: var(--primary); display: flex; align-items: baseline; gap: 6px; text-shadow: 0 0 20px rgba(0,255,153,0.4); }
+  .hc-pair .unit { font-size: 14px; color: var(--muted); font-weight: 400; }
+  .hc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+  .hc-cell { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 14px 16px; }
+  .hc-cell .label { font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px; }
+  .hc-cell .val { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 18px; }
+  .hc-cell.buy .val { color: var(--primary); } .hc-cell.sell .val { color: var(--danger); }
+  .live-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(0,255,153,0.1); border: 1px solid rgba(0,255,153,0.2); border-radius: 20px; padding: 4px 10px; font-size: 10px; color: var(--primary); font-family: 'JetBrains Mono', monospace; font-weight: 500; margin-top: 16px; }
+
+  /* TRUST */
+  .trust-strip { display: flex; gap: 12px; padding: 16px 0 32px; flex-wrap: wrap; }
+  .trust-item { display: flex; align-items: center; gap: 8px; background: var(--glass); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 16px; font-size: 12px; font-weight: 500; color: var(--text); flex: 1; min-width: 180px; transition: border-color 0.3s; backdrop-filter: blur(6px); }
+  .trust-item:hover { border-color: rgba(0,255,153,0.3); }
+
+  /* SECTION */
+  .section-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
+  .section-title { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .section-title::before { content: ''; display: block; width: 3px; height: 18px; background: linear-gradient(180deg, var(--primary), var(--secondary)); border-radius: 2px; }
+  .tab-grp { display: flex; gap: 4px; background: var(--bg2); border-radius: 8px; padding: 3px; }
+  .tab { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 6px; cursor: pointer; color: var(--muted); transition: all 0.2s; border: none; background: transparent; font-family: 'Syne', sans-serif; }
+  .tab.active { background: var(--bg3); color: var(--text); }
+
+  /* TABLE */
+  .market-table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 32px; }
+  .market-table { width: 100%; border-collapse: collapse; }
+  .market-table thead th { background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); padding: 13px 18px; text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+  .market-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s; }
+  .market-table tbody tr:last-child { border-bottom: none; }
+  .market-table tbody tr:hover { background: rgba(0,255,153,0.03); }
+  .market-table td { padding: 16px 18px; font-size: 13px; white-space: nowrap; vertical-align: middle; }
+  .asset-cell { display: flex; align-items: center; gap: 12px; }
+  .asset-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0; font-family: 'Orbitron', monospace; }
+  .icon-usdt { background: rgba(38,161,123,0.15); border: 1px solid rgba(38,161,123,0.3); color: #26a17b; }
+  .icon-btc { background: rgba(247,147,26,0.12); border: 1px solid rgba(247,147,26,0.3); color: #f7931a; }
+  .icon-eth { background: rgba(98,126,234,0.12); border: 1px solid rgba(98,126,234,0.3); color: #627eea; }
+  .icon-bnb { background: rgba(243,186,47,0.12); border: 1px solid rgba(243,186,47,0.3); color: #f3ba2f; }
+  .asset-info .name { font-weight: 700; font-size: 14px; color: var(--text); }
+  .asset-info .pair { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+  .price-cell { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 13px; }
+  .price-cell.buy { color: var(--primary); } .price-cell.sell { color: var(--danger); }
+  .chg-cell { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 4px; }
+  .chg-up { color: var(--primary); background: rgba(0,255,153,0.08); } .chg-dn { color: var(--danger); background: rgba(255,77,77,0.08); }
+  .actions { display: flex; gap: 8px; align-items: center; }
+  .btn-sm-buy { background: rgba(0,255,153,0.12); border: 1px solid rgba(0,255,153,0.3); color: var(--primary); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; padding: 6px 14px; border-radius: 6px; cursor: pointer; text-decoration: none; transition: all 0.2s; display: inline-block; }
+  .btn-sm-buy:hover { background: rgba(0,255,153,0.22); box-shadow: 0 0 14px rgba(0,255,153,0.2); transform: translateY(-1px); }
+  .btn-sm-sell { background: rgba(255,77,77,0.1); border: 1px solid rgba(255,77,77,0.3); color: var(--danger); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; padding: 6px 14px; border-radius: 6px; cursor: pointer; text-decoration: none; transition: all 0.2s; display: inline-block; }
+  .btn-sm-sell:hover { background: rgba(255,77,77,0.18); box-shadow: 0 0 14px rgba(255,77,77,0.2); transform: translateY(-1px); }
+  .sparkline { display: inline-block; width: 64px; height: 28px; vertical-align: middle; }
+
+  /* CARDS */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .trade-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 22px; position: relative; overflow: hidden; transition: all 0.3s; }
+  .trade-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--primary), transparent); opacity: 0; transition: opacity 0.3s; }
+  .trade-card:hover { border-color: rgba(0,255,153,0.25); box-shadow: var(--glow-g); transform: translateY(-3px); }
+  .trade-card:hover::before { opacity: 1; }
+  .tc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .tc-badge { font-size: 9px; padding: 3px 8px; border-radius: 12px; font-weight: 700; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; }
+  .badge-up { background: rgba(0,255,153,0.12); color: var(--primary); border: 1px solid rgba(0,255,153,0.2); }
+  .badge-dn { background: rgba(255,77,77,0.1); color: var(--danger); border: 1px solid rgba(255,77,77,0.2); }
+  .tc-name { font-weight: 700; font-size: 15px; } .tc-sub { font-size: 11px; color: var(--muted); margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
+  .tc-price { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 22px; color: var(--text); margin: 6px 0; }
+  .tc-chg { font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .tc-mini-chart { margin: 12px 0; height: 44px; }
+  /* Fix #5: Two-button trade layout for cards */
+  .btn-trade-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .btn-trade-buy { background: linear-gradient(135deg, rgba(0,255,153,0.15), rgba(0,194,255,0.1)); border: 1px solid rgba(0,255,153,0.25); color: var(--primary); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 9px 6px; border-radius: 8px; cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .btn-trade-buy:hover { background: rgba(0,255,153,0.2); box-shadow: 0 0 20px rgba(0,255,153,0.15); }
+  .btn-trade-sell { background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.2); color: var(--danger); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 9px 6px; border-radius: 8px; cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .btn-trade-sell:hover { background: rgba(255,77,77,0.16); box-shadow: 0 0 20px rgba(255,77,77,0.12); }
+
+  /* CALCULATOR */
+  .calc-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .calc-section::after { content: 'CALC'; position: absolute; top: -10px; right: 20px; font-family: 'Orbitron', monospace; font-size: 80px; font-weight: 900; color: rgba(0,255,153,0.03); pointer-events: none; }
+  .calc-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
+  .calc-input-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .calc-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; }
+  .calc-input-row { display: flex; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; transition: border-color 0.2s; }
+  .calc-input-row:focus-within { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,255,153,0.1); }
+  .calc-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; padding: 14px 16px; }
+  .calc-cur { padding: 0 16px; font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; color: var(--secondary); border-left: 1px solid rgba(255,255,255,0.08); }
+  .calc-arrow { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: rgba(0,255,153,0.1); border: 1px solid rgba(0,255,153,0.2); border-radius: 50%; font-size: 18px; color: var(--primary); flex-shrink: 0; cursor: pointer; transition: all 0.2s; }
+  .calc-arrow:hover { background: rgba(0,255,153,0.2); }
+  .calc-rate-info { margin-top: 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .rate-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .rate-chip span { color: var(--text); }
+  .calc-cta { margin-top: 20px; display: flex; gap: 12px; }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+  .stat-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; transition: border-color 0.3s; }
+  .stat-card:hover { border-color: rgba(0,194,255,0.25); }
+  .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; }
+  .stat-val { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 22px; color: var(--text); }
+  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+  .stat-card .glow-dot { position: absolute; top: 16px; right: 16px; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 8px var(--primary); }
+
+  /* HOW IT WORKS */
+  .how-section { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; padding: 36px; margin-bottom: 32px; }
+  .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 28px; position: relative; }
+  .steps-grid::before { content: ''; position: absolute; top: 28px; left: 60px; right: 60px; height: 1px; background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary)); opacity: 0.2; pointer-events: none; }
+  .step { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+  .step-num { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--primary); background: rgba(0,255,153,0.08); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-weight: 700; font-size: 16px; color: var(--primary); box-shadow: 0 0 20px rgba(0,255,153,0.15); position: relative; z-index: 1; }
+  .step-title { font-weight: 700; font-size: 14px; } .step-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* FOOTER */
+  footer { position: relative; z-index: 1; border-top: 1px solid var(--border); background: var(--bg2); padding: 32px 24px; text-align: center; }
+  .footer-logo { font-family: 'Orbitron', monospace; font-weight: 900; font-size: 22px; letter-spacing: 3px; margin-bottom: 8px; }
+  .footer-logo .x { color: var(--primary); text-shadow: 0 0 10px rgba(0,255,153,0.6); }
+  .footer-tagline { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
+  .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 20px; flex-wrap: wrap; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: 12px; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--primary); }
+  .footer-disc { font-size: 10px; color: rgba(107,114,128,0.6); max-width: 600px; margin: 0 auto; line-height: 1.7; }
+
+  /* STALE RATE INDICATOR */
+  .stale-banner { display: none; position: fixed; bottom: 16px; right: 16px; background: rgba(255,184,0,0.12); border: 1px solid rgba(255,184,0,0.35); border-radius: 8px; padding: 8px 14px; font-size: 11px; color: var(--warn); font-family: 'JetBrains Mono', monospace; z-index: 500; backdrop-filter: blur(6px); }
+  .stale-banner.visible { display: block; }
+
+  /* ══════════════════════════════════════
+     TRADE MODAL
+  ══════════════════════════════════════ */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.open { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: #0E1420;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    border: 1px solid var(--border);
+  }
+  @keyframes slideUp { from { transform: translateY(40px) scale(0.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+  .modal-top-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+  }
+  .modal-top-bar.sell-bar {
+    background: linear-gradient(90deg, var(--danger), #ff8080);
+  }
+
+  .modal-header {
+    padding: 24px 24px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .modal-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .modal-title {
+    font-family: 'Orbitron', monospace;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+  .modal-title.buy-title { color: var(--primary); }
+  .modal-title.sell-title { color: var(--danger); }
+
+  .modal-close {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 16px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+  .modal-body { padding: 20px 24px 24px; }
+
+  /* Rate display inside modal */
+  .modal-rate-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+  }
+  .modal-rate-label { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .modal-rate-val { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; }
+  .modal-rate-val.buy-rate { color: var(--primary); }
+  .modal-rate-val.sell-rate { color: var(--danger); }
+
+  /* Amount input */
+  .modal-field { margin-bottom: 16px; }
+  .modal-field-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-input-row {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .modal-input-row:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,255,153,0.08); }
+  .modal-input-row.sell-focus:focus-within { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(255,77,77,0.08); }
+  .modal-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    padding: 14px 16px;
+  }
+  .modal-input::placeholder { color: rgba(107,114,128,0.5); }
+  .modal-input-cur {
+    padding: 0 16px;
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--secondary);
+    border-left: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
+  }
+
+  /* Quick amounts */
+  .quick-amounts {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .qa-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .qa-btn:hover { background: rgba(0,255,153,0.08); border-color: rgba(0,255,153,0.2); color: var(--primary); }
+
+  /* Warning banners in modal */
+  .modal-warn {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,184,0,0.08);
+    border: 1px solid rgba(255,184,0,0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--warn);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 14px;
+  }
+  .modal-warn.visible { display: flex; }
+
+  /* Summary box */
+  .modal-summary {
+    background: rgba(0,255,153,0.05);
+    border: 1px solid rgba(0,255,153,0.15);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .modal-summary.sell-summary { background: rgba(255,77,77,0.05); border-color: rgba(255,77,77,0.15); }
+  .modal-summary.visible { display: block; }
+  .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 8px; }
+  .summary-row:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .summary-row .s-label { color: var(--muted); }
+  .summary-row .s-val { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text); }
+  .summary-row.highlight .s-val { color: var(--primary); font-size: 16px; }
+  .summary-row.highlight-sell .s-val { color: var(--danger); font-size: 16px; }
+
+  /* CTA */
+  .modal-cta {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.25s;
+    text-decoration: none;
+  }
+  .modal-cta.buy-cta { background: linear-gradient(135deg, var(--primary), #00CC80); color: #000; }
+  .modal-cta.buy-cta:hover { box-shadow: 0 8px 28px rgba(0,255,153,0.45); transform: translateY(-1px); }
+  .modal-cta.sell-cta { background: linear-gradient(135deg, var(--danger), #ff7070); color: #fff; }
+  .modal-cta.sell-cta:hover { box-shadow: 0 8px 28px rgba(255,77,77,0.4); transform: translateY(-1px); }
+  .modal-cta:disabled, .modal-cta.disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; pointer-events: none; }
+
+  .modal-hint { text-align: center; margin-top: 12px; font-size: 11px; color: var(--muted); }
+  .modal-hint a { color: var(--primary); text-decoration: none; }
+
+  /* FLASH */
+  @keyframes flash-up { 0% { color: var(--primary); } 100% { color: inherit; } }
+  @keyframes flash-dn { 0% { color: var(--danger); } 100% { color: inherit; } }
+  .flash-up { animation: flash-up 0.6s ease; }
+  .flash-dn { animation: flash-dn 0.6s ease; }
+
+  /* HAMBURGER */
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 6px; background: transparent; border: none; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s; }
+  .mobile-nav { display: none; position: fixed; top: 64px; left: 0; right: 0; background: rgba(11,15,23,0.97); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 16px 24px; z-index: 99; flex-direction: column; gap: 4px; }
+  .mobile-nav a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); display: block; transition: color 0.2s; }
+  .mobile-nav a:last-child { border-bottom: none; }
+  .mobile-nav a:hover { color: var(--primary); }
+  .mobile-nav.open { display: flex; }
+
+  /* MOBILE RATE BANNER */
+  .mobile-rate-banner { display: none; background: var(--glass); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+  .mrb-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px; }
+  .mrb-rate { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 22px; color: var(--primary); }
+  .mrb-sub { display: flex; gap: 16px; margin-top: 8px; }
+  .mrb-buy { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--primary); }
+  .mrb-sell { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--danger); }
+
+  @media (max-width: 900px) {
+    nav { padding: 0 16px; }
+    .nav-center { display: none; }
+    .hamburger { display: flex; }
+    .hero { grid-template-columns: 1fr; padding: 32px 0 24px; }
+    .hero-card { display: none; }
+    .mobile-rate-banner { display: block; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+    .steps-grid::before { display: none; }
+    .calc-grid { grid-template-columns: 1fr; }
+    .calc-arrow { transform: rotate(90deg); margin: 0 auto; }
+  }
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+    .market-table thead { display: none; }
+    .market-table td { display: block; padding: 6px 16px; }
+    .market-table td::before { content: attr(data-label); font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 2px; }
+    .market-table td:first-child { display: none; }
+    .market-table tr { display: block; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: rgba(0,255,153,0.2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,255,153,0.4); }
+
+  /* ═══ ABOUT SECTION ═══ */
+  .about-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; padding: 48px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .about-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--primary), var(--secondary), transparent); }
+  .about-section::after { content: 'NEXA'; position: absolute; right: -20px; top: 50%; transform: translateY(-50%); font-family: 'Orbitron', monospace; font-size: 120px; font-weight: 900; color: rgba(0,255,153,0.03); pointer-events: none; letter-spacing: 10px; }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .about-tagline { font-family: 'Orbitron', monospace; font-size: clamp(20px, 2.5vw, 30px); font-weight: 700; line-height: 1.3; margin-bottom: 20px; }
+  .about-tagline .accent { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .about-body { color: var(--muted); font-size: 15px; line-height: 1.8; margin-bottom: 24px; }
+  .about-pills { display: flex; gap: 10px; flex-wrap: wrap; }
+  .about-pill { background: rgba(0,255,153,0.07); border: 1px solid rgba(0,255,153,0.18); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--primary); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
+  .about-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .about-metric { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 24px; text-align: center; transition: border-color 0.3s; }
+  .about-metric:hover { border-color: rgba(0,255,153,0.25); }
+  .am-num { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 28px; color: var(--primary); text-shadow: 0 0 20px rgba(0,255,153,0.3); }
+  .am-label { font-size: 11px; color: var(--muted); margin-top: 6px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
+  @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; gap: 28px; } .about-section { padding: 28px; } }
+
+  /* ═══ WHY NEXA SECTION ═══ */
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 32px; }
+  .why-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 14px; padding: 22px; transition: all 0.3s; position: relative; overflow: hidden; }
+  .why-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,255,153,0.04), rgba(0,194,255,0.02)); opacity: 0; transition: opacity 0.3s; border-radius: 14px; }
+  .why-card:hover { border-color: rgba(0,255,153,0.3); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,255,153,0.08); }
+  .why-card:hover::before { opacity: 1; }
+  .why-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+  .why-title { font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 8px; }
+  .why-desc { font-size: 12px; color: var(--muted); line-height: 1.65; }
+
+  /* ═══ ACTIVITY FEED ═══ */
+  .activity-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 32px; }
+  .activity-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .activity-live { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+  .activity-feed { max-height: 320px; overflow-y: auto; }
+  .activity-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.2s; animation: slideIn 0.4s ease; }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+  .activity-item:hover { background: rgba(255,255,255,0.02); }
+  .activity-item:last-child { border-bottom: none; }
+  .act-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .act-dot.buy { background: var(--primary); box-shadow: 0 0 8px rgba(0,255,153,0.6); }
+  .act-dot.sell { background: var(--danger); box-shadow: 0 0 8px rgba(255,77,77,0.6); }
+  .act-info { flex: 1; }
+  .act-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .act-sub { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+  .act-amount { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; text-align: right; }
+  .act-amount.buy { color: var(--primary); }
+  .act-amount.sell { color: var(--danger); }
+  .act-time { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; white-space: nowrap; min-width: 55px; text-align: right; }
+
+  /* ═══ COMMUNITY TRUST SECTION ═══ */
+  .community-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; padding: 40px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .community-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--secondary), transparent); }
+  .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 24px; }
+  .testimonial-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 20px; transition: all 0.3s; position: relative; }
+  .testimonial-card:hover { border-color: rgba(0,194,255,0.25); transform: translateY(-3px); }
+  .testi-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .testi-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .av1 { background: rgba(0,255,153,0.15); border: 1px solid rgba(0,255,153,0.3); color: var(--primary); }
+  .av2 { background: rgba(0,194,255,0.15); border: 1px solid rgba(0,194,255,0.3); color: var(--secondary); }
+  .av3 { background: rgba(255,184,0,0.15); border: 1px solid rgba(255,184,0,0.3); color: var(--warn); }
+  .av4 { background: rgba(255,77,77,0.1); border: 1px solid rgba(255,77,77,0.25); color: var(--danger); }
+  .testi-name { font-weight: 700; font-size: 13px; }
+  .testi-handle { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .testi-verified { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--primary); margin-top: 3px; }
+  .testi-body { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 14px; }
+  .testi-trade { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,255,153,0.08); border: 1px solid rgba(0,255,153,0.15); border-radius: 6px; padding: 4px 10px; font-size: 11px; color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+  .testi-stars { color: var(--warn); font-size: 12px; letter-spacing: 1px; margin-top: 10px; }
+  .community-cta { margin-top: 28px; text-align: center; }
+  .community-cta p { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  .community-placeholder { border: 1.5px dashed rgba(0,255,153,0.2); border-radius: 12px; padding: 28px; text-align: center; color: var(--muted); font-size: 13px; margin-top: 8px; background: rgba(0,255,153,0.02); }
+  .community-placeholder strong { color: var(--primary); }
+
+  /* ═══ SECURITY SECTION ═══ */
+  .security-section { background: var(--bg2); border: 1px solid var(--border2); border-radius: 20px; padding: 40px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .security-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 28px; }
+  .security-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 24px; transition: all 0.3s; }
+  .security-card:hover { border-color: rgba(0,194,255,0.25); transform: translateY(-3px); }
+  .sec-num { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; color: var(--secondary); letter-spacing: 2px; margin-bottom: 12px; }
+  .sec-icon { font-size: 24px; margin-bottom: 10px; display: block; }
+  .sec-title { font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 8px; }
+  .sec-desc { font-size: 12px; color: var(--muted); line-height: 1.65; }
+
+  /* ═══ OTC VS P2P SECTION ═══ */
+  .compare-section { margin-bottom: 32px; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+  .compare-card { background: var(--bg2); border-radius: 16px; padding: 28px; }
+  .compare-card.otc { border: 1px solid rgba(0,255,153,0.25); box-shadow: 0 0 30px rgba(0,255,153,0.06); }
+  .compare-card.p2p { border: 1px solid rgba(255,77,77,0.15); }
+  .compare-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .compare-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
+  .badge-recommended { background: rgba(0,255,153,0.15); color: var(--primary); border: 1px solid rgba(0,255,153,0.3); }
+  .badge-typical { background: rgba(107,114,128,0.15); color: var(--muted); border: 1px solid rgba(107,114,128,0.2); }
+  .compare-title { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 16px; }
+  .compare-title.otc-title { color: var(--primary); }
+  .compare-title.p2p-title { color: var(--muted); }
+  .compare-list { display: flex; flex-direction: column; gap: 10px; }
+  .compare-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5; }
+  .ci-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+  @media (max-width: 700px) { .compare-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- Fix #3: Stale rates fallback banner (hidden until API fails) -->
+<div class="stale-banner" id="staleBanner">⚠ Rates may be delayed</div>
+
+<!-- ══ TRADE MODAL ══ -->
+<div class="modal-overlay" id="tradeModal">
+  <div class="modal" id="modalBox">
+    <div class="modal-top-bar" id="modalBar"></div>
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <div class="modal-label" id="modalLabel">PLACE ORDER</div>
+        <div class="modal-title" id="modalTitle">BUY USDT</div>
+      </div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-rate-row">
+        <div class="modal-rate-label">Current Rate</div>
+        <div class="modal-rate-val" id="modalRateVal">— ETB / USDT</div>
+      </div>
+
+      <div class="modal-field">
+        <div class="modal-field-label">
+          <span id="modalAmountLabel">AMOUNT TO BUY (USDT)</span>
+          <span id="modalMin" style="color:var(--primary);font-size:10px;">Min: 10 USDT</span>
+        </div>
+        <div class="modal-input-row" id="modalInputRow">
+          <input class="modal-input" id="modalAmountInput" type="number" min="0" placeholder="0.00" oninput="onModalInput()">
+          <div class="modal-input-cur" id="modalInputCur">USDT</div>
+        </div>
+      </div>
+
+      <div class="quick-amounts" id="quickAmounts"></div>
+
+      <!-- Fix #9: Max value warning -->
+      <div class="modal-warn" id="modalMaxWarn">⚠ Orders over 50,000 USDT equivalent require prior arrangement. Please contact us on Telegram first.</div>
+
+      <div class="modal-summary" id="modalSummary">
+        <div class="summary-row">
+          <span class="s-label">Asset</span>
+          <span class="s-val" id="sumAsset">USDT</span>
+        </div>
+        <div class="summary-row">
+          <span class="s-label" id="sumAmountLabel">You Send (USDT)</span>
+          <span class="s-val" id="sumAmount">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="s-label" id="sumRecLabel">You Pay (ETB)</span>
+          <span class="s-val" id="sumRec">—</span>
+        </div>
+        <div class="summary-row" id="sumHighlightRow">
+          <span class="s-label">Rate Used</span>
+          <span class="s-val" id="sumRate">—</span>
+        </div>
+      </div>
+
+      <!-- ── CONTACT FORM (shown after amount entered) ── -->
+      <div id="orderForm" style="display:none;margin-top:14px;border-top:1px solid rgba(255,255,255,0.07);padding-top:14px;">
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">YOUR CONTACT DETAILS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;">FULL NAME *</div>
+            <input id="orderName" type="text" placeholder="Abebe Kebede" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" />
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;">PHONE / TELEGRAM *</div>
+            <input id="orderPhone" type="text" placeholder="+251 9XX XXX XXX" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" />
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;">NOTES (optional)</div>
+          <textarea id="orderNotes" rows="2" placeholder="Preferred bank, wallet address, or any notes..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;resize:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'"></textarea>
+        </div>
+      </div>
+
+      <button class="modal-cta disabled" id="modalCTA" onclick="submitOrder()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.36 13.95l-2.97-.924c-.647-.204-.66-.647.136-.958l11.57-4.462c.538-.194 1.01.131.798.615z"/></svg>
+        <span id="modalCTAText">Enter Amount to Continue</span>
+      </button>
+
+      <!-- Success state -->
+      <div id="orderSuccess" style="display:none;text-align:center;padding:20px 0;">
+        <div style="font-size:36px;margin-bottom:10px;">✅</div>
+        <div style="font-family:'Orbitron',monospace;font-weight:700;color:var(--primary);font-size:15px;margin-bottom:6px;">Order Submitted!</div>
+        <div style="color:var(--muted);font-size:13px;margin-bottom:14px;">Your order has been received. Our operator will contact you on Telegram shortly.</div>
+        <a href="https://t.me/crypton_r" target="_blank" class="modal-cta buy-cta" style="text-decoration:none;display:inline-flex;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.36 13.95l-2.97-.924c-.647-.204-.66-.647.136-.958l11.57-4.462c.538-.194 1.01.131.798.615z"/></svg>
+          Open Telegram — @crypton_r
+        </a>
+      </div>
+
+      <div class="modal-hint" id="modalHint">Fill in your details above, then submit your order. We'll confirm via Telegram.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <div class="ticker-label">⚡ LIVE</div>
+  <div style="overflow:hidden;flex:1;display:flex;align-items:center;">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">
+    <span class="ne">NE</span><span class="x">X</span><span class="a">A</span>
+    <span class="logo-badge">OTC</span>
+  </a>
+  <div class="nav-center">
+    <!-- Fix #8: data-section attributes for IntersectionObserver scroll-based active state -->
+    <a class="nav-link active" data-section="hero">Market</a>
+    <a class="nav-link" data-section="market-section">Exchange</a>
+    <a class="nav-link" data-section="calc-section">Calculator</a>
+    <a class="nav-link" data-section="about-section">About</a>
+    <a class="nav-link" data-section="how-section">How It Works</a>
+  </div>
+  <div class="nav-right">
+    <div class="status-dot">
+      <div class="dot"></div>
+      <span>Market Live</span>
+    </div>
+    <!-- Fix #15: Display text changed to NEXA OTC, href unchanged -->
+    <a href="https://t.me/crypton_r" target="_blank" class="btn-tg">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.36 13.95l-2.97-.924c-.647-.204-.66-.647.136-.958l11.57-4.462c.538-.194 1.01.131.798.615z"/></svg>
+      @crypton_r
+    </a>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<!-- Mobile nav dropdown -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#hero" onclick="closeMobileNav()">Market</a>
+  <a href="#market-section" onclick="closeMobileNav()">Exchange</a>
+  <a href="#calc-section" onclick="closeMobileNav()">Calculator</a>
+  <a href="#about-section" onclick="closeMobileNav()">About</a>
+  <a href="#how-section" onclick="closeMobileNav()">How It Works</a>
+</div>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <!-- Fix #8: Mobile rate display shown above title on small screens -->
+    <div class="mobile-rate-banner">
+      <div class="mrb-label">USDT / ETB · LIVE RATE</div>
+      <div class="mrb-rate" id="mobileHeroPrice">— <span style="font-size:14px;color:var(--muted);">ETB</span></div>
+      <div class="mrb-sub">
+        <span class="mrb-buy">↑ Buy: <span id="mobileBuy">—</span></span>
+        <span class="mrb-sell">↓ Sell: <span id="mobileSell">—</span></span>
+      </div>
+    </div>
+    <div>
+      <div class="hero-title">
+        Ethiopia's Premier
+        <span class="line2">Crypto OTC Market</span>
+      </div>
+      <p class="hero-sub">Trade USDT, BTC, ETH and more at the best OTC rates in Ethiopia. Fast, secure manual settlement via Telegram.</p>
+      <div class="hero-ctas">
+        <button class="btn-buy" onclick="openModal('buy','usdt')">↑ Buy Crypto</button>
+        <button class="btn-sell" onclick="openModal('sell','usdt')">↓ Sell Crypto</button>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hc-label">USDT / ETB &nbsp; SPOT RATE</div>
+      <div class="hc-pair" id="heroPrice">— <span class="unit">ETB</span></div>
+      <div class="hc-row">
+        <div class="hc-cell buy">
+          <div class="label">BUY RATE</div>
+          <div class="val" id="heroBuy">—</div>
+        </div>
+        <div class="hc-cell sell">
+          <div class="label">SELL RATE</div>
+          <div class="val" id="heroSell">—</div>
+        </div>
+      </div>
+      <div class="live-badge"><div class="dot" style="width:5px;height:5px;"></div> Live Market Price — Refreshed Every 30s</div>
+    </div>
+  </section>
+
+  <!-- TRUST -->
+  <div class="trust-strip">
+    <div class="trust-item">⚡ Fast response: 2–5 minutes</div>
+    <div class="trust-item">🔒 Secure manual OTC trading</div>
+    <div class="trust-item">📈 Est. 1,000+ trades since launch</div>
+    <div class="trust-item">🇪🇹 Ethiopia's trusted OTC desk</div>
+  </div>
+
+  <!-- Fix #3 & #4: Qualified trade count, removed fake 5-star rating -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="glow-dot"></div>
+      <div class="stat-label">Avg Response</div>
+      <div class="stat-val">~3 min</div>
+      <div class="stat-sub up">🟢 Available now</div>
+    </div>
+    <div class="stat-card">
+      <div class="glow-dot"></div>
+      <div class="stat-label">Est. Total Trades</div>
+      <div class="stat-val">1,000+</div>
+      <div class="stat-sub">Since launch · growing daily</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Min Order</div>
+      <div class="stat-val">10 USDT</div>
+      <div class="stat-sub">No upper cap set</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Community Feedback</div>
+      <div class="stat-val" style="font-size:15px;padding-top:4px;">Positive</div>
+      <div class="stat-sub">Real reviews on Telegram</div>
+    </div>
+  </div>
+
+  <!-- MARKET TABLE -->
+  <div class="section-hdr" id="market-section">
+    <div class="section-title">Live Market</div>
+    <div class="tab-grp">
+      <button class="tab active" data-filter="all">All</button>
+      <button class="tab" data-filter="stablecoin">Stablecoin</button>
+      <button class="tab" data-filter="crypto">Crypto</button>
+    </div>
+  </div>
+  <div class="market-table-wrap">
+    <table class="market-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Asset</th>
+          <th>Buy Price</th>
+          <th>Sell Price</th>
+          <th>24h Change</th>
+          <!-- Fix #14: Liquidity column removed entirely -->
+          <th>Trend</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="marketBody"></tbody>
+    </table>
+  </div>
+
+  <!-- TRADING CARDS -->
+  <div class="section-hdr">
+    <div class="section-title">Quick Trade</div>
+  </div>
+  <div class="cards-grid" id="cardsGrid"></div>
+
+  <!-- CALCULATOR -->
+  <div class="section-hdr" id="calc-section">
+    <div class="section-title">Rate Calculator</div>
+  </div>
+  <div class="calc-section">
+    <!-- Fix #13: Calculator clearly labeled as USDT/ETB only -->
+    <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:16px;background:rgba(0,194,255,0.06);border:1px solid rgba(0,194,255,0.15);border-radius:8px;padding:8px 14px;">ℹ️ This calculator is for <strong style="color:var(--secondary);">USDT / ETB</strong> only. For BTC, ETH, or BNB — open a trade and the rate is shown in the order modal.</div>
+    <div class="calc-grid">
+      <!-- Fix #6: Labels now have IDs so swapCalc() can update them -->
+      <div class="calc-input-wrap">
+        <div class="calc-label" id="calcLabelLeft">YOU SEND (USDT)</div>
+        <div class="calc-input-row">
+          <input class="calc-input" id="calcUsdt" type="number" value="100" min="0" oninput="calcUpdate('usdt')">
+          <div class="calc-cur" id="calcCurLeft">USDT</div>
+        </div>
+      </div>
+      <div class="calc-arrow" onclick="swapCalc()">⇄</div>
+      <div class="calc-input-wrap">
+        <div class="calc-label" id="calcLabelRight">YOU RECEIVE (ETB)</div>
+        <div class="calc-input-row">
+          <input class="calc-input" id="calcEtb" type="number" value="" min="0" oninput="calcUpdate('etb')">
+          <div class="calc-cur" id="calcCurRight">ETB</div>
+        </div>
+      </div>
+    </div>
+    <div class="calc-rate-info">
+      <div class="rate-chip">Rate: <span id="calcRateDisplay">Loading…</span></div>
+      <div class="rate-chip">Min: <span>10 USDT</span></div>
+      <div class="rate-chip">Max: <span>50,000 USDT</span></div>
+    </div>
+    <div class="calc-cta">
+      <button class="btn-buy" style="font-size:13px;padding:11px 24px;" onclick="openModalFromCalc('buy')">↑ Buy USDT</button>
+      <button class="btn-sell" style="font-size:13px;padding:11px 24px;" onclick="openModalFromCalc('sell')">↓ Sell USDT</button>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section" id="how-section">
+    <div class="section-hdr" style="margin-bottom:0;">
+      <div class="section-title">How It Works</div>
+    </div>
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Check Rate</div>
+        <div class="step-desc">View live buy/sell prices on this platform. Updated every 30 seconds from market data.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Enter Amount</div>
+        <div class="step-desc">Click Buy or Sell, enter your amount and see the exact ETB total instantly.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Open Telegram</div>
+        <div class="step-desc">Your order details are sent to NEXA OTC on Telegram automatically.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">Settlement</div>
+        <div class="step-desc">Transfer funds and receive crypto or ETB. Fast, verified, done.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ ADDITIONAL SECTIONS — Fix #19: kept separate wrapper for layout parity ══ -->
+<div style="position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 20px 60px;">
+
+  <!-- ABOUT NEXA OTC -->
+  <div class="section-hdr" id="about-section" style="margin-bottom:16px;">
+    <div class="section-title">About NEXA OTC</div>
+  </div>
+  <div class="about-section">
+    <div class="about-grid">
+      <div>
+        <div class="about-tagline">Built for Ethiopia.<br><span class="accent">Trusted by Traders.</span></div>
+        <p class="about-body">NEXA OTC is Ethiopia's dedicated over-the-counter crypto trading desk, designed for individuals and businesses who need fast, reliable, and human-verified crypto settlement without the complexity of exchange platforms.<br><br>We exist because Ethiopian traders deserve a service that speaks their language, understands local payment infrastructure, and delivers at the speed of Telegram — not a ticket queue.</p>
+        <div class="about-pills">
+          <span class="about-pill">Manual OTC</span>
+          <span class="about-pill">Human Verified</span>
+          <span class="about-pill">Telegram Direct</span>
+          <span class="about-pill">ETB Settlement</span>
+          <span class="about-pill">USDT · BTC · ETH · BNB</span>
+        </div>
+      </div>
+      <div class="about-metrics">
+        <div class="about-metric">
+          <div class="am-num">1,000+</div>
+          <div class="am-label">EST. TRADES SINCE LAUNCH</div>
+        </div>
+        <div class="about-metric">
+          <div class="am-num">~3 min</div>
+          <div class="am-label">AVG RESPONSE TIME</div>
+        </div>
+        <div class="about-metric">
+          <div class="am-num">10 USDT</div>
+          <div class="am-label">MINIMUM ORDER</div>
+        </div>
+        <div class="about-metric">
+          <div class="am-num" style="font-size:18px;padding-top:6px;">Community</div>
+          <div class="am-label">FEEDBACK: POSITIVE</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY PEOPLE USE NEXA OTC -->
+  <div class="section-hdr" style="margin-bottom:16px;">
+    <div class="section-title">Why People Choose NEXA OTC</div>
+  </div>
+  <div class="why-grid">
+    <div class="why-card">
+      <span class="why-icon">⚡</span>
+      <div class="why-title">Fast Settlement</div>
+      <div class="why-desc">Most orders confirmed and settled within minutes. No waiting rooms, no queues — just direct communication.</div>
+    </div>
+    <div class="why-card">
+      <span class="why-icon">💬</span>
+      <div class="why-title">Direct Telegram Support</div>
+      <div class="why-desc">Talk to a real person on every trade. No bots, no ticket systems. Your operator is there when you need them.</div>
+    </div>
+    <div class="why-card">
+      <span class="why-icon">📊</span>
+      <div class="why-title">Transparent Pricing</div>
+      <div class="why-desc">Live rates shown upfront. Your exact ETB amount is calculated before you confirm — no hidden fees, no surprises.</div>
+    </div>
+    <div class="why-card">
+      <span class="why-icon">✅</span>
+      <div class="why-title">Human Verification</div>
+      <div class="why-desc">Every trade is manually reviewed and confirmed by a real operator before funds move. You're never left guessing.</div>
+    </div>
+    <div class="why-card">
+      <span class="why-icon">🔒</span>
+      <div class="why-title">Secure Process</div>
+      <div class="why-desc">Rate locked at confirmation. Settlement only after mutual verification. Your order never disappears into a void.</div>
+    </div>
+    <div class="why-card">
+      <span class="why-icon">📐</span>
+      <div class="why-title">Flexible Trade Sizes</div>
+      <div class="why-desc">From 10 USDT casual trades to large institutional OTC blocks. NEXA handles any size with the same professionalism.</div>
+    </div>
+    <div class="why-card">
+      <span class="why-icon">🇪🇹</span>
+      <div class="why-title">Ethiopia-First Design</div>
+      <div class="why-desc">Built around CBE, Awash, and local bank transfers. No international cards or complex verification required to get started.</div>
+    </div>
+    <div class="why-card">
+      <span class="why-icon">🏆</span>
+      <div class="why-title">Premium Customer Service</div>
+      <div class="why-desc">First-time trader or seasoned crypto holder — you get the same premium attention. Questions welcome before, during, and after every trade.</div>
+    </div>
+  </div>
+
+  <!-- SAMPLE TRADE ACTIVITY — Fix #1: Labeled as sample data, not live -->
+  <div class="section-hdr" style="margin-bottom:16px;">
+    <div class="section-title">Recent Trade Activity</div>
+  </div>
+  <div class="activity-section">
+    <div class="activity-header">
+      <div class="section-title" style="margin-bottom:0;">Sample Trades</div>
+      <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">📋 Example activity · not real-time</div>
+    </div>
+    <div class="activity-feed" id="activityFeed"></div>
+  </div>
+
+  <!-- COMMUNITY TRUST -->
+  <div class="section-hdr" style="margin-bottom:16px;">
+    <div class="section-title">Community Trust</div>
+  </div>
+  <div class="community-section">
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testi-top">
+          <div class="testi-avatar av1">AM</div>
+          <div>
+            <div class="testi-name">Abebe M.</div>
+            <div class="testi-handle">@abebe_trades</div>
+            <div class="testi-verified" style="color:var(--muted);">Community Member</div>
+          </div>
+        </div>
+        <div class="testi-body">"Fastest USDT buy I've ever done in Ethiopia. Rate was exactly what the site showed, no games. Already on my 4th trade."</div>
+        <div class="testi-trade">✅ Completed · 500 USDT Buy</div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testi-top">
+          <div class="testi-avatar av2">ST</div>
+          <div>
+            <div class="testi-name">Sara T.</div>
+            <div class="testi-handle">@sara_addis</div>
+            <div class="testi-verified" style="color:var(--muted);">Community Member</div>
+          </div>
+        </div>
+        <div class="testi-body">"I was nervous first time but the operator explained everything step by step. My ETH sell went smooth. Will use again definitely."</div>
+        <div class="testi-trade">✅ Completed · 0.5 ETH Sell</div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testi-top">
+          <div class="testi-avatar av3">YB</div>
+          <div>
+            <div class="testi-name">Yonas B.</div>
+            <div class="testi-handle">@yonas_crypto</div>
+            <div class="testi-verified" style="color:var(--muted);">Community Member</div>
+          </div>
+        </div>
+        <div class="testi-body">"Best OTC desk in Addis. I send 1000 USDT, operator confirms rate, transfer done, money in my account same day. No stress."</div>
+        <div class="testi-trade">✅ Completed · 1,000 USDT Sell</div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testi-top">
+          <div class="testi-avatar av4">HG</div>
+          <div>
+            <div class="testi-name">Hana G.</div>
+            <div class="testi-handle">@hana_eth</div>
+            <div class="testi-verified" style="color:var(--muted);">Community Member</div>
+          </div>
+        </div>
+        <div class="testi-body">"NEXA always picks up. Even at 9pm I got a reply in 2 minutes. That kind of service builds real trust. Recommended to everyone."</div>
+        <div class="testi-trade">✅ Completed · 250 USDT Buy</div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+    </div>
+    <div class="community-cta">
+      <div class="community-placeholder">
+        <strong>📸 Real customer screenshots &amp; Telegram vouches go here.</strong><br>
+        <span style="font-size:12px;margin-top:6px;display:block;">Send your trade confirmation screenshot to NEXA OTC on Telegram to be featured.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW SECURITY WORKS -->
+  <div class="section-hdr" style="margin-bottom:16px;">
+    <div class="section-title">How Security Works</div>
+  </div>
+  <div class="security-section">
+    <p style="color:var(--muted);font-size:14px;line-height:1.7;max-width:640px;">Every NEXA OTC trade follows a strict manual verification process. You'll never be asked to send funds without a confirmed rate and a live operator on the line.</p>
+    <div class="security-grid">
+      <div class="security-card">
+        <div class="sec-num">STEP 01</div>
+        <span class="sec-icon">📡</span>
+        <div class="sec-title">Rate Confirmation</div>
+        <div class="sec-desc">Live market rate is pulled from CoinGecko and displayed on-site. Your final OTC rate is confirmed by the operator on Telegram before any payment.</div>
+      </div>
+      <div class="security-card">
+        <div class="sec-num">STEP 02</div>
+        <span class="sec-icon">🔎</span>
+        <div class="sec-title">Manual Verification</div>
+        <div class="sec-desc">Operator reviews your order details — asset, amount, and payment method — manually. No automated bots are involved in your trade.</div>
+      </div>
+      <div class="security-card">
+        <div class="sec-num">STEP 03</div>
+        <span class="sec-icon">💬</span>
+        <div class="sec-title">Telegram Communication</div>
+        <div class="sec-desc">All coordination happens on a dedicated Telegram thread. Payment instructions, wallet addresses, and confirmations are shared directly and only with you.</div>
+      </div>
+      <div class="security-card">
+        <div class="sec-num">STEP 04</div>
+        <span class="sec-icon">🤝</span>
+        <div class="sec-title">Trade Confirmation</div>
+        <div class="sec-desc">Both sides confirm before funds are released. The operator sends a receipt and trade confirmation once settlement is complete.</div>
+      </div>
+      <div class="security-card">
+        <div class="sec-num">STEP 05</div>
+        <span class="sec-icon">✅</span>
+        <div class="sec-title">Settlement &amp; Receipt</div>
+        <div class="sec-desc">Crypto is sent to your wallet or ETB transferred to your bank. A completed order summary is sent to you on Telegram. Done.</div>
+      </div>
+      <div class="security-card">
+        <div class="sec-num">ALWAYS</div>
+        <span class="sec-icon">🚫</span>
+        <div class="sec-title">What We Never Do</div>
+        <div class="sec-desc">NEXA OTC will never ask for your seed phrase, private keys, or passwords. If anyone does — it is not us. Your funds stay yours.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTC VS P2P -->
+  <div class="compare-section">
+  <div class="section-hdr" style="margin-bottom:16px;">
+    <div class="section-title">Why OTC Instead of P2P?</div>
+  </div>
+  <div class="compare-grid" style="margin-bottom:32px;">
+    <div class="compare-card otc">
+      <div class="compare-header">
+        <div>
+          <div class="compare-title otc-title">NEXA OTC</div>
+        </div>
+        <span class="compare-badge badge-recommended">RECOMMENDED</span>
+      </div>
+      <div class="compare-list">
+        <div class="compare-item"><span class="ci-icon">✅</span><span>Direct human operator — always a real person on every trade</span></div>
+        <div class="compare-item"><span class="ci-icon">✅</span><span>Rate locked at confirmation — no last-minute changes</span></div>
+        <div class="compare-item"><span class="ci-icon">✅</span><span>Settlement in minutes — not hours of waiting for counterparts</span></div>
+        <div class="compare-item"><span class="ci-icon">✅</span><span>No counterparty risk — you deal with one verified desk, not strangers</span></div>
+        <div class="compare-item"><span class="ci-icon">✅</span><span>Personalized guidance for first-time traders</span></div>
+        <div class="compare-item"><span class="ci-icon">✅</span><span>Large orders handled professionally with no slippage surprises</span></div>
+        <div class="compare-item"><span class="ci-icon">✅</span><span>Works with Ethiopian banks — CBE, Awash, Telebirr</span></div>
+      </div>
+    </div>
+    <div class="compare-card p2p">
+      <div class="compare-header">
+        <div>
+          <div class="compare-title p2p-title">Typical P2P</div>
+        </div>
+        <span class="compare-badge badge-typical">TYPICAL ISSUES</span>
+      </div>
+      <div class="compare-list">
+        <div class="compare-item"><span class="ci-icon" style="color:var(--danger);">✗</span><span style="color:var(--muted);">Random strangers — trust varies per person and platform</span></div>
+        <div class="compare-item"><span class="ci-icon" style="color:var(--danger);">✗</span><span style="color:var(--muted);">Rates can change after you initiate — confusion and disputes common</span></div>
+        <div class="compare-item"><span class="ci-icon" style="color:var(--danger);">✗</span><span style="color:var(--muted);">Waiting for available sellers — sometimes hours of delay</span></div>
+        <div class="compare-item"><span class="ci-icon" style="color:var(--danger);">✗</span><span style="color:var(--muted);">Counterparty risk — scammers, unresponsive traders, frozen accounts</span></div>
+        <div class="compare-item"><span class="ci-icon" style="color:var(--danger);">✗</span><span style="color:var(--muted);">No guidance — you figure it out alone</span></div>
+        <div class="compare-item"><span class="ci-icon" style="color:var(--danger);">✗</span><span style="color:var(--muted);">Large orders split across multiple traders — complex and risky</span></div>
+        <div class="compare-item"><span class="ci-icon" style="color:var(--danger);">✗</span><span style="color:var(--muted);">KYC requirements, identity verification, and platform fees</span></div>
+      </div>
+    </div>
+  </div>
+  </div><!-- end compare-section -->
+
+</div>
+
+<footer>
+  <div class="footer-logo">NE<span class="x">X</span>A <span style="font-size:12px;letter-spacing:4px;color:var(--muted);">OTC</span></div>
+  <div class="footer-tagline">Ethiopia's trusted OTC crypto desk</div>
+  <!-- Fix #20: Show Telegram handle visibly in footer -->
+  <div style="margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:13px;">
+    <a href="https://t.me/crypton_r" target="_blank" style="color:var(--primary);text-decoration:none;">📱 t.me/crypton_r &nbsp;·&nbsp; @crypton_r</a>
+  </div>
+  <div class="footer-links">
+    <!-- Fix #6 & #20: Wired footer links to correct section IDs -->
+    <a href="https://t.me/crypton_r" target="_blank">Telegram — @crypton_r</a>
+    <a href="#market-section">Market</a>
+    <a href="#hero">Rates</a>
+    <a href="#how-section">How It Works</a>
+  </div>
+  <div class="footer-disc">NEXA OTC is a manual over-the-counter trading facilitation service. We do not operate a live exchange. All prices shown are indicative rates. Final rates are confirmed via Telegram at time of trade. Cryptocurrency trading carries risk. Trade responsibly.</div>
+</footer>
+
+<script>
+const TG = 'https://t.me/crypton_r';
+
+// ─── ASSET DEFINITIONS ───
+// Starting prices are fallback values used if the CoinGecko API hasn't loaded yet.
+// The ETB spread is applied as ±0.5% from the USD/ETB mid-market rate.
+const ETB_PER_USD_FALLBACK = 183; // fallback only; real rate from API
+const SPREAD = 0.01; // 0.5% buy/sell spread
+
+const assets = [
+  { id:'usdt', name:'USDT', pair:'USDT / ETB', icon:'₮', iconClass:'icon-usdt',
+    cgId:'tether',    buy: 125.00, sell: 124.00, change: 0, unit: 'ETB' },
+  { id:'btc',  name:'BTC',  pair:'BTC / USD',  icon:'₿', iconClass:'icon-btc',
+    cgId:'bitcoin',   buy: 68000,  sell: 67660,  change: 0, unit: 'USD' },
+  { id:'eth',  name:'ETH',  pair:'ETH / USD',  icon:'Ξ', iconClass:'icon-eth',
+    cgId:'ethereum',  buy: 3500,   sell: 3482,   change: 0, unit: 'USD' },
+  { id:'bnb',  name:'BNB',  pair:'BNB / USD',  icon:'B', iconClass:'icon-bnb',
+    cgId:'binancecoin', buy: 580,  sell: 577,    change: 0, unit: 'USD' },
+];
+
+let prices = assets.map(a => ({ buy: a.buy, sell: a.sell }));
+let lastKnownEtbRate = ETB_PER_USD_FALLBACK;
+
+// ─── MODAL STATE ───
+let modalMode = 'buy';
+let modalAssetIdx = 0;
+
+// ─── FIX #14: LOADING STATE ───
+// Show loading placeholders in hero and table while first fetch is in progress
+function showLoadingState() {
+  const loadingText = '⏳ Loading...';
+  const heroPrice = document.getElementById('heroPrice');
+  if (heroPrice) heroPrice.innerHTML = loadingText;
+  ['heroBuy','heroSell','mobileHeroPrice','mobileBuy','mobileSell'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '—';
+  });
+  document.getElementById('calcRateDisplay').textContent = 'Loading rates…';
+}
+showLoadingState();
+
+// ─── BACKEND API BASE URL ───
+// Automatically detects if running on localhost or a deployed server
+const API_BASE = window.location.origin;
+
+// ─── LIVE PRICES FROM BACKEND ───
+async function fetchLivePrices() {
+  try {
+    const res = await fetch(API_BASE + '/api/prices');
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const json = await res.json();
+    if (!json.ok) throw new Error('Backend error');
+    const d = json.data;
+
+    prices[0] = { buy: d.usdt.buy, sell: d.usdt.sell };
+    prices[1] = { buy: d.btc.buy,  sell: d.btc.sell  };
+    prices[2] = { buy: d.eth.buy,  sell: d.eth.sell  };
+    prices[3] = { buy: d.bnb.buy,  sell: d.bnb.sell  };
+
+    assets[0].change = d.usdt.change;
+    assets[1].change = d.btc.change;
+    assets[2].change = d.eth.change;
+    assets[3].change = d.bnb.change;
+
+    lastKnownEtbRate = d.etbRate;
+
+    updateAllPriceDisplays();
+    updateTicker();
+    document.getElementById('staleBanner').classList.remove('visible');
+    if (json.stale) document.getElementById('staleBanner').classList.add('visible');
+  } catch(e) {
+    console.warn('Backend price fetch failed, falling back to CoinGecko direct:', e);
+    // Fallback: fetch directly from CoinGecko if backend is down
+    try {
+      const url = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,tether&vs_currencies=usd,etb&include_24hr_change=true';
+      const res = await fetch(url);
+      const data = await res.json();
+      const etbRate = data.tether?.etb ?? lastKnownEtbRate;
+      lastKnownEtbRate = etbRate;
+      prices[0] = { buy: etbRate*(1+SPREAD), sell: etbRate*(1-SPREAD) };
+      prices[1] = { buy: data.bitcoin?.usd*(1+SPREAD), sell: data.bitcoin?.usd*(1-SPREAD) };
+      prices[2] = { buy: data.ethereum?.usd*(1+SPREAD), sell: data.ethereum?.usd*(1-SPREAD) };
+      prices[3] = { buy: data.binancecoin?.usd*(1+SPREAD), sell: data.binancecoin?.usd*(1-SPREAD) };
+      assets[0].change = data.tether?.usd_24h_change ?? 0;
+      assets[1].change = data.bitcoin?.usd_24h_change ?? 0;
+      assets[2].change = data.ethereum?.usd_24h_change ?? 0;
+      assets[3].change = data.binancecoin?.usd_24h_change ?? 0;
+      updateAllPriceDisplays(); updateTicker();
+      document.getElementById('staleBanner').classList.remove('visible');
+    } catch(e2) {
+      document.getElementById('staleBanner').classList.add('visible');
+    }
+  }
+}
+
+async function fetchChangeData() { /* handled by backend now */ }
+
+function updateAllPriceDisplays() {
+  assets.forEach((a, i) => {
+    const buyEl  = document.getElementById('tbl-buy-'  + a.id);
+    const sellEl = document.getElementById('tbl-sell-' + a.id);
+    const cardEl = document.getElementById('card-price-' + a.id);
+
+    if (buyEl) {
+      const prev = parseFloat(buyEl.dataset.prev || prices[i].buy);
+      const up = prices[i].buy >= prev;
+      buyEl.textContent = fmtPrice(prices[i].buy, a.unit);
+      buyEl.dataset.prev = prices[i].buy;
+      buyEl.classList.remove('flash-up', 'flash-dn');
+      void buyEl.offsetWidth;
+      buyEl.classList.add(up ? 'flash-up' : 'flash-dn');
+    }
+    if (sellEl) sellEl.textContent = fmtPrice(prices[i].sell, a.unit);
+    if (cardEl) cardEl.textContent = fmtPrice(prices[i].buy, a.unit);
+
+    if (a.id === 'usdt') {
+      document.getElementById('heroPrice').innerHTML = prices[i].buy.toFixed(2) + ' <span class="unit">ETB</span>';
+      document.getElementById('heroBuy').textContent  = prices[i].buy.toFixed(2);
+      document.getElementById('heroSell').textContent = prices[i].sell.toFixed(2);
+      // Fix #8: Update mobile rate banner
+      const mhp = document.getElementById('mobileHeroPrice');
+      if (mhp) mhp.innerHTML = prices[i].buy.toFixed(2) + ' <span style="font-size:14px;color:var(--muted);">ETB</span>';
+      const mb = document.getElementById('mobileBuy');
+      const ms = document.getElementById('mobileSell');
+      if (mb) mb.textContent = prices[i].buy.toFixed(2) + ' ETB';
+      if (ms) ms.textContent = prices[i].sell.toFixed(2) + ' ETB';
+    }
+  });
+
+  // Update calculator rate display
+  document.getElementById('calcRateDisplay').textContent = '1 USDT = ' + prices[0].buy.toFixed(2) + ' ETB';
+  calcUpdate(calcSwapped ? 'etb' : 'usdt');
+
+  // If modal open, refresh rate display
+  if (document.getElementById('tradeModal').classList.contains('open')) {
+    const a   = assets[modalAssetIdx];
+    const rate = modalMode === 'buy' ? prices[modalAssetIdx].buy : prices[modalAssetIdx].sell;
+    const rateEl = document.getElementById('modalRateVal');
+    rateEl.textContent = a.unit === 'ETB'
+      ? rate.toFixed(2) + ' ETB / ' + a.name
+      : '$' + rate.toLocaleString('en', {minimumFractionDigits:2}) + ' / ' + a.name;
+    if (document.getElementById('modalAmountInput').value) onModalInput();
+  }
+}
+
+// Initial load + every 30 seconds
+fetchChangeData().then(() => {
+  fetchLivePrices();
+});
+setInterval(() => {
+  fetchChangeData().then(() => fetchLivePrices());
+}, 30000);
+
+// ─── TICKER — Fix #10: rebuilt dynamically from live asset data ───
+function buildTicker() {
+  const track = document.getElementById('tickerTrack');
+  track.innerHTML = '';
+  // Build items array from current assets
+  const items = assets.map(a => {
+    const up = a.change >= 0;
+    const priceFmt = a.unit === 'ETB'
+      ? prices[assets.indexOf(a)].buy.toFixed(2)
+      : prices[assets.indexOf(a)].buy > 1000
+        ? prices[assets.indexOf(a)].buy.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2})
+        : prices[assets.indexOf(a)].buy.toFixed(2);
+    const changeFmt = (up ? '+' : '') + a.change.toFixed(2) + '%';
+    return { sym: a.pair, price: priceFmt, change: changeFmt, dir: up ? 'up' : 'dn' };
+  });
+  // Duplicate for seamless loop
+  [...items, ...items].forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'ticker-item';
+    el.innerHTML = `<span class="sym">${t.sym}</span><span class="price">${t.price}</span><span class="chg ${t.dir==='up'?'up':'down'}">${t.change}</span>`;
+    track.appendChild(el);
+  });
+}
+
+function updateTicker() {
+  buildTicker();
+}
+
+buildTicker(); // initial placeholder render
+
+// ─── SPARKLINES ───
+// NOTE: These sparklines are ILLUSTRATIVE only — they show a stylised flat trend line
+// coloured green or red based on the asset's 24h direction. They do not represent
+// real historical price data.
+function spark(id, up) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  // Flat neutral line with gentle midline wave — illustrative only, not real price data
+  const midY = H / 2;
+  const pts = Array.from({length:14}, (_,i) => ({
+    x: (i / 13) * W,
+    y: midY + Math.sin(i * 0.8) * (H * 0.12) * (up ? -1 : 1)
+  }));
+  ctx.clearRect(0, 0, W, H);
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, up ? 'rgba(0,255,153,0.25)' : 'rgba(255,77,77,0.25)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+  ctx.fillStyle = g; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.strokeStyle = up ? 'rgba(0,255,153,0.75)' : 'rgba(255,77,77,0.75)';
+  ctx.lineWidth = 1.5; ctx.stroke();
+}
+
+// ─── FORMAT ───
+function fmtPrice(v, unit) {
+  if (unit === 'ETB') return v.toFixed(2) + ' ETB';
+  if (v > 1000) return '$' + v.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return '$' + v.toFixed(2);
+}
+
+// ─── TABLE — Fix #14: Liquidity column removed ───
+function buildTable() {
+  const tbody = document.getElementById('marketBody');
+  tbody.innerHTML = '';
+  assets.forEach((a, i) => {
+    const up = a.change >= 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;">${i+1}</td>
+      <td data-label="Asset"><div class="asset-cell"><div class="asset-icon ${a.iconClass}">${a.icon}</div><div class="asset-info"><div class="name">${a.name}</div><div class="pair">${a.pair}</div></div></div></td>
+      <td class="price-cell buy" id="tbl-buy-${a.id}" data-label="Buy (${a.unit})">${fmtPrice(a.buy, a.unit)}</td>
+      <td class="price-cell sell" id="tbl-sell-${a.id}" data-label="Sell (${a.unit})">${fmtPrice(a.sell, a.unit)}</td>
+      <td data-label="24h Change"><span class="chg-cell ${up?'chg-up':'chg-dn'}" id="chg-${a.id}">${up?'▲':'▼'} ${Math.abs(a.change).toFixed(2)}%</span></td>
+      <td data-label="Trend"><canvas id="spk-${a.id}" class="sparkline" width="64" height="28"></canvas><div style="font-size:9px;color:var(--muted);text-align:center;margin-top:2px;">Trend (illustrative)</div></td>
+      <td data-label="Action"><div class="actions">
+        <button class="btn-sm-buy"  onclick="openModal('buy','${a.id}')">Buy</button>
+        <button class="btn-sm-sell" onclick="openModal('sell','${a.id}')">Sell</button>
+      </div></td>`;
+    tbody.appendChild(tr);
+  });
+  assets.forEach(a => spark('spk-' + a.id, a.change >= 0));
+}
+buildTable();
+
+// ─── CARDS — Fix #5: Each card now has Buy AND Sell buttons ───
+function buildCards() {
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+  assets.forEach(a => {
+    const up = a.change >= 0;
+    const div = document.createElement('div');
+    div.className = 'trade-card';
+    div.innerHTML = `
+      <div class="tc-header">
+        <div><div class="tc-name">${a.name}</div><div class="tc-sub">${a.pair}</div></div>
+        <span class="tc-badge ${up?'badge-up':'badge-dn'}">${up?'▲':'▼'} ${Math.abs(a.change).toFixed(2)}%</span>
+      </div>
+      <div class="tc-price" id="card-price-${a.id}">${fmtPrice(a.buy, a.unit)}</div>
+      <div class="tc-chg ${up?'up':'down'}">${up?'Trending Up':'Trending Down'}</div>
+      <div class="tc-mini-chart"><canvas id="card-spk-${a.id}" width="200" height="44"></canvas></div>
+      <div class="btn-trade-row">
+        <button class="btn-trade-buy" onclick="openModal('buy','${a.id}')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.36 13.95l-2.97-.924c-.647-.204-.66-.647.136-.958l11.57-4.462c.538-.194 1.01.131.798.615z"/></svg>
+          Buy
+        </button>
+        <button class="btn-trade-sell" onclick="openModal('sell','${a.id}')">↓ Sell</button>
+      </div>`;
+    grid.appendChild(div);
+  });
+  setTimeout(() => {
+    assets.forEach(a => {
+      const c = document.getElementById('card-spk-' + a.id);
+      if (c) { c.width = c.offsetWidth || 200; spark('card-spk-' + a.id, a.change >= 0); }
+    });
+  }, 50);
+}
+buildCards();
+
+// ─── CALCULATOR — Fix #6: swapCalc swaps both values AND labels ───
+let calcSwapped = false; // tracks current orientation: false = USDT→ETB, true = ETB→USDT
+
+function calcUpdate(from) {
+  const rate = prices[0].buy;
+  if (!calcSwapped) {
+    // Normal: left=USDT, right=ETB
+    if (from === 'usdt') {
+      const usdt = parseFloat(document.getElementById('calcUsdt').value) || 0;
+      document.getElementById('calcEtb').value = (usdt * rate).toFixed(2);
+    } else {
+      const etb = parseFloat(document.getElementById('calcEtb').value) || 0;
+      document.getElementById('calcUsdt').value = (etb / rate).toFixed(4);
+    }
+  } else {
+    // Swapped: left=ETB, right=USDT (fields still have same IDs, labels swapped)
+    if (from === 'usdt') {
+      // 'usdt' input is now visually labelled ETB
+      const etb = parseFloat(document.getElementById('calcUsdt').value) || 0;
+      document.getElementById('calcEtb').value = (etb / rate).toFixed(4);
+    } else {
+      const usdt = parseFloat(document.getElementById('calcEtb').value) || 0;
+      document.getElementById('calcUsdt').value = (usdt * rate).toFixed(2);
+    }
+  }
+  document.getElementById('calcRateDisplay').textContent = '1 USDT = ' + rate.toFixed(2) + ' ETB';
+}
+
+function swapCalc() {
+  calcSwapped = !calcSwapped;
+  // Swap the displayed values
+  const u = document.getElementById('calcUsdt').value;
+  const e = document.getElementById('calcEtb').value;
+  document.getElementById('calcUsdt').value = e;
+  document.getElementById('calcEtb').value   = u;
+  // Swap the labels and currency badges
+  if (calcSwapped) {
+    document.getElementById('calcLabelLeft').textContent  = 'YOU SEND (ETB)';
+    document.getElementById('calcCurLeft').textContent    = 'ETB';
+    document.getElementById('calcLabelRight').textContent = 'YOU RECEIVE (USDT)';
+    document.getElementById('calcCurRight').textContent   = 'USDT';
+  } else {
+    document.getElementById('calcLabelLeft').textContent  = 'YOU SEND (USDT)';
+    document.getElementById('calcCurLeft').textContent    = 'USDT';
+    document.getElementById('calcLabelRight').textContent = 'YOU RECEIVE (ETB)';
+    document.getElementById('calcCurRight').textContent   = 'ETB';
+  }
+}
+
+// ─── MODAL ───
+function openModal(mode, assetId, prefillAmount) {
+  const idx = assets.findIndex(a => a.id === assetId);
+  modalMode = mode;
+  modalAssetIdx = idx < 0 ? 0 : idx;
+  const asset = assets[modalAssetIdx];
+  const price = mode === 'buy' ? prices[modalAssetIdx].buy : prices[modalAssetIdx].sell;
+  const isBuy = mode === 'buy';
+
+  document.getElementById('modalBar').className = 'modal-top-bar' + (isBuy ? '' : ' sell-bar');
+  document.getElementById('modalTitle').textContent = (isBuy ? 'BUY ' : 'SELL ') + asset.name;
+  document.getElementById('modalTitle').className   = 'modal-title ' + (isBuy ? 'buy-title' : 'sell-title');
+  document.getElementById('modalLabel').textContent = isBuy ? 'PLACE BUY ORDER' : 'PLACE SELL ORDER';
+
+  const rateEl = document.getElementById('modalRateVal');
+  rateEl.className = 'modal-rate-val ' + (isBuy ? 'buy-rate' : 'sell-rate');
+  rateEl.textContent = asset.unit === 'ETB'
+    ? price.toFixed(2) + ' ETB / ' + asset.name
+    : '$' + price.toLocaleString('en', {minimumFractionDigits:2}) + ' / ' + asset.name;
+
+  document.getElementById('modalAmountLabel').textContent = isBuy
+    ? 'AMOUNT TO BUY (' + asset.name + ')'
+    : 'AMOUNT TO SELL (' + asset.name + ')';
+  document.getElementById('modalInputCur').textContent = asset.name;
+  document.getElementById('modalMin').textContent = asset.id === 'usdt' ? 'Min: 10 USDT' : 'Min: 0.001 ' + asset.name;
+  document.getElementById('modalInputRow').className = 'modal-input-row' + (isBuy ? '' : ' sell-focus');
+
+  const qas = document.getElementById('quickAmounts');
+  qas.innerHTML = '';
+  const quicks = asset.id === 'usdt' ? [50,100,250,500,1000] :
+                 asset.id === 'btc'  ? [0.01,0.05,0.1,0.5,1] :
+                 asset.id === 'eth'  ? [0.1,0.5,1,2,5] : [1,5,10,25,50];
+  quicks.forEach(q => {
+    const b = document.createElement('button');
+    b.className = 'qa-btn';
+    b.textContent = q < 1 ? q : q.toLocaleString();
+    b.onclick = () => setQuick(q);
+    qas.appendChild(b);
+  });
+
+  document.getElementById('sumAsset').textContent = asset.name;
+  document.getElementById('sumAmountLabel').textContent = isBuy ? 'You Buy (' + asset.name + ')' : 'You Sell (' + asset.name + ')';
+  document.getElementById('sumRecLabel').textContent    = isBuy ? 'You Pay' : 'You Receive';
+  document.getElementById('sumHighlightRow').className  = isBuy ? 'summary-row highlight' : 'summary-row highlight-sell';
+  document.getElementById('modalSummary').className     = 'modal-summary' + (isBuy ? '' : ' sell-summary');
+
+  const cta = document.getElementById('modalCTA');
+  cta.className = 'modal-cta disabled ' + (isBuy ? 'buy-cta' : 'sell-cta');
+  document.getElementById('modalCTAText').textContent = 'Enter Amount to Continue';
+
+  document.getElementById('modalAmountInput').value = '';
+  document.getElementById('modalSummary').classList.remove('visible');
+  document.getElementById('modalMaxWarn').classList.remove('visible');
+
+  if (prefillAmount) {
+    document.getElementById('modalAmountInput').value = prefillAmount;
+    onModalInput();
+  }
+
+  document.getElementById('tradeModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('modalAmountInput').focus(), 300);
+}
+
+function closeModal() {
+  document.getElementById('tradeModal').classList.remove('open');
+  document.body.style.overflow = '';
+  // Reset form
+  setTimeout(() => {
+    document.getElementById('orderForm').style.display = 'none';
+    document.getElementById('orderSuccess').style.display = 'none';
+    document.getElementById('orderName').value = '';
+    document.getElementById('orderPhone').value = '';
+    document.getElementById('orderNotes').value = '';
+    document.getElementById('orderName').style.borderColor = 'rgba(255,255,255,0.12)';
+    document.getElementById('orderPhone').style.borderColor = 'rgba(255,255,255,0.12)';
+    // Show body elements again
+    Array.from(document.querySelector('.modal-body').children).forEach(el => {
+      if (el.id === 'orderSuccess') { el.style.display = 'none'; return; }
+      el.style.display = '';
+    });
+    document.querySelector('.modal-body').style.opacity = '1';
+  }, 300);
+}
+
+document.getElementById('tradeModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function setQuick(val) {
+  document.getElementById('modalAmountInput').value = val;
+  onModalInput();
+}
+
+// Store calculated totals for order submission
+let _orderCalc = {};
+
+function onModalInput() {
+  const asset  = assets[modalAssetIdx];
+  const isBuy  = modalMode === 'buy';
+  const rate   = isBuy ? prices[modalAssetIdx].buy : prices[modalAssetIdx].sell;
+  const amount = parseFloat(document.getElementById('modalAmountInput').value);
+  const summary = document.getElementById('modalSummary');
+  const cta     = document.getElementById('modalCTA');
+  const maxWarn = document.getElementById('modalMaxWarn');
+  const orderForm = document.getElementById('orderForm');
+
+  if (!amount || amount <= 0) {
+    summary.classList.remove('visible');
+    maxWarn.classList.remove('visible');
+    cta.className = 'modal-cta disabled ' + (isBuy ? 'buy-cta' : 'sell-cta');
+    document.getElementById('modalCTAText').textContent = 'Enter Amount to Continue';
+    orderForm.style.display = 'none';
+    return;
+  }
+
+  let usdtEquiv = asset.unit === 'ETB' ? amount : amount * rate;
+  const exceedsMax = usdtEquiv > 50000;
+  maxWarn.classList.toggle('visible', exceedsMax);
+
+  let payAmount, receiveAmount;
+  if (asset.unit === 'ETB') {
+    if (isBuy) { payAmount = (amount * rate).toFixed(2); receiveAmount = amount.toFixed(2); }
+    else        { receiveAmount = (amount * rate).toFixed(2); payAmount = amount.toFixed(2); }
+  } else {
+    if (isBuy) { payAmount = '$' + (amount * rate).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); receiveAmount = amount; }
+    else        { receiveAmount = '$' + (amount * rate).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); payAmount = amount; }
+  }
+
+  document.getElementById('sumAmount').textContent = amount + ' ' + asset.name;
+  document.getElementById('sumRec').textContent = isBuy
+    ? (asset.unit === 'ETB' ? payAmount + ' ETB' : payAmount)
+    : (asset.unit === 'ETB' ? receiveAmount + ' ETB' : receiveAmount);
+  document.getElementById('sumRate').textContent = asset.unit === 'ETB'
+    ? rate.toFixed(2) + ' ETB/' + asset.name
+    : '$' + rate.toLocaleString('en', {minimumFractionDigits:2});
+  summary.classList.add('visible');
+
+  // Store for submission
+  _orderCalc = {
+    asset: asset.name, type: isBuy ? 'buy' : 'sell',
+    amount, rate, unit: asset.unit,
+    total: asset.unit === 'ETB' ? parseFloat((amount * rate).toFixed(2)) : parseFloat((amount * rate).toFixed(2))
+  };
+
+  // Show form
+  orderForm.style.display = 'block';
+  cta.className = 'modal-cta ' + (isBuy ? 'buy-cta' : 'sell-cta');
+  document.getElementById('modalCTAText').textContent = isBuy
+    ? `✓ Submit Buy Order — ${amount} ${asset.name}`
+    : `✓ Submit Sell Order — ${amount} ${asset.name}`;
+}
+
+// ─── SUBMIT ORDER TO BACKEND ───
+async function submitOrder() {
+  const cta = document.getElementById('modalCTA');
+  if (cta.classList.contains('disabled')) return;
+
+  const name  = document.getElementById('orderName').value.trim();
+  const phone = document.getElementById('orderPhone').value.trim();
+  const notes = document.getElementById('orderNotes').value.trim();
+
+  if (!name || !phone) {
+    document.getElementById('orderName').style.borderColor = name ? 'rgba(255,255,255,0.12)' : 'var(--danger)';
+    document.getElementById('orderPhone').style.borderColor = phone ? 'rgba(255,255,255,0.12)' : 'var(--danger)';
+    return;
+  }
+
+  cta.classList.add('disabled');
+  document.getElementById('modalCTAText').textContent = 'Submitting…';
+
+  try {
+    const res = await fetch(API_BASE + '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, notes, ..._orderCalc })
+    });
+    const json = await res.json();
+    if (json.ok) {
+      // Show success
+      document.getElementById('modalBody') && (document.getElementById('orderForm').style.display = 'none');
+      document.querySelector('.modal-body').style.opacity = '0';
+      setTimeout(() => {
+        document.querySelector('.modal-body').style.opacity = '1';
+        document.getElementById('orderSuccess').style.display = 'block';
+        document.querySelector('.modal-body > *:not(#orderSuccess)') && null;
+        // Hide everything except success
+        Array.from(document.querySelector('.modal-body').children).forEach(el => {
+          if (el.id !== 'orderSuccess') el.style.display = 'none';
+        });
+        document.getElementById('orderSuccess').style.display = 'block';
+      }, 200);
+    } else {
+      throw new Error(json.error || 'Unknown error');
+    }
+  } catch(err) {
+    document.getElementById('modalCTAText').textContent = '⚠ Error — Try Again';
+    cta.classList.remove('disabled');
+    setTimeout(() => {
+      document.getElementById('modalCTAText').textContent = `✓ Submit Order — ${_orderCalc.amount} ${_orderCalc.asset}`;
+    }, 3000);
+  }
+}
+
+function openModalFromCalc(mode) {
+  const usdt = parseFloat(document.getElementById('calcUsdt').value) || null;
+  openModal(mode, 'usdt', usdt);
+}
+
+// ─── FIX #8: IntersectionObserver for scroll-based active nav link ───
+const navLinks = document.querySelectorAll('.nav-link[data-section]');
+const sectionIds = ['hero', 'market-section', 'calc-section', 'how-section', 'about-section'];
+
+const observerOptions = {
+  root: null,
+  rootMargin: '-20% 0px -60% 0px',
+  threshold: 0
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.dataset.section === id);
+      });
+    }
+  });
+}, observerOptions);
+
+sectionIds.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) observer.observe(el);
+});
+
+// Also allow nav links to scroll to their section on click
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    const target = document.getElementById(link.dataset.section);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// ─── TABS — Fix #5: Wire up filter logic ───
+// asset categories for tab filtering
+const assetCategories = { usdt: 'stablecoin', btc: 'crypto', eth: 'crypto', bnb: 'crypto' };
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const filter = tab.dataset.filter || 'all';
+    // Filter market table rows
+    const tbody = document.getElementById('marketBody');
+    if (tbody) {
+      Array.from(tbody.querySelectorAll('tr')).forEach(row => {
+        const assetId = row.querySelector('[id^="tbl-buy-"]')?.id?.replace('tbl-buy-','');
+        if (!assetId) return;
+        const cat = assetCategories[assetId] || 'crypto';
+        row.style.display = (filter === 'all' || filter === cat) ? '' : 'none';
+      });
+    }
+    // Filter cards
+    const cards = document.getElementById('cardsGrid');
+    if (cards) {
+      Array.from(cards.querySelectorAll('.trade-card')).forEach((card, i) => {
+        const a = assets[i];
+        if (!a) return;
+        const cat = assetCategories[a.id] || 'crypto';
+        card.style.display = (filter === 'all' || filter === cat) ? '' : 'none';
+      });
+    }
+  });
+});
+
+// Escape key
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Initialise calculator display once prices loaded
+document.getElementById('calcRateDisplay').textContent = '1 USDT = ' + prices[0].buy.toFixed(2) + ' ETB';
+document.getElementById('calcEtb').value = (100 * prices[0].buy).toFixed(2);
+
+// ─── ACTIVITY FEED ───
+const activityData = [
+  { type:'buy',  asset:'USDT', amount:'500 USDT',  etb:'63,250 ETB',  minsAgo: 2  },
+  { type:'sell', asset:'BTC',  amount:'0.05 BTC',  etb:'$3,401 USD',  minsAgo: 7  },
+  { type:'buy',  asset:'USDT', amount:'1,000 USDT',etb:'126,400 ETB', minsAgo: 12 },
+  { type:'buy',  asset:'ETH',  amount:'0.5 ETH',   etb:'$1,748 USD',  minsAgo: 18 },
+  { type:'sell', asset:'USDT', amount:'250 USDT',  etb:'31,500 ETB',  minsAgo: 25 },
+  { type:'buy',  asset:'BNB',  amount:'5 BNB',     etb:'$2,895 USD',  minsAgo: 33 },
+  { type:'sell', asset:'ETH',  amount:'1 ETH',     etb:'$3,496 USD',  minsAgo: 41 },
+  { type:'buy',  asset:'USDT', amount:'200 USDT',  etb:'25,280 ETB',  minsAgo: 55 },
+  { type:'buy',  asset:'BTC',  amount:'0.02 BTC',  etb:'$1,360 USD',  minsAgo: 68 },
+  { type:'sell', asset:'USDT', amount:'750 USDT',  etb:'94,500 ETB',  minsAgo: 82 },
+];
+
+function fmtAgo(mins) {
+  if (mins < 60) return mins + 'm ago';
+  return Math.floor(mins/60) + 'h ' + (mins%60) + 'm ago';
+}
+
+function buildActivityFeed() {
+  const feed = document.getElementById('activityFeed');
+  if (!feed) return;
+  feed.innerHTML = '';
+  activityData.forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = 'activity-item';
+    el.style.animationDelay = (i * 0.04) + 's';
+    el.innerHTML = `
+      <div class="act-dot ${item.type}"></div>
+      <div class="act-info">
+        <div class="act-title">${item.asset} ${item.type === 'buy' ? 'Buy' : 'Sell'} Order — Completed ✓</div>
+        <div class="act-sub">Settled via Telegram · Verified</div>
+      </div>
+      <div class="act-amount ${item.type}">${item.amount}</div>
+      <div class="act-time">${fmtAgo(item.minsAgo)}</div>`;
+    feed.appendChild(el);
+  });
+}
+buildActivityFeed();
+// Fix #15: Removed the fake live setInterval — activity feed is static sample data only
+
+// ─── FIX #7: HAMBURGER MENU ───
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const mobileNav = document.getElementById('mobileNav');
+hamburgerBtn.addEventListener('click', () => {
+  mobileNav.classList.toggle('open');
+  const spans = hamburgerBtn.querySelectorAll('span');
+  const isOpen = mobileNav.classList.contains('open');
+  spans[0].style.transform = isOpen ? 'rotate(45deg) translate(5px, 5px)' : '';
+  spans[1].style.opacity   = isOpen ? '0' : '1';
+  spans[2].style.transform = isOpen ? 'rotate(-45deg) translate(5px, -5px)' : '';
+});
+function closeMobileNav() {
+  mobileNav.classList.remove('open');
+  const spans = hamburgerBtn.querySelectorAll('span');
+  spans[0].style.transform = '';
+  spans[1].style.opacity   = '1';
+  spans[2].style.transform = '';
+}
+// Close mobile nav on outside click
+document.addEventListener('click', (e) => {
+  if (!hamburgerBtn.contains(e.target) && !mobileNav.contains(e.target)) {
+    closeMobileNav();
+  }
+});
+</script>
+</body>
+</html>

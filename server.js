@@ -70,6 +70,33 @@ function sendTelegramMessage(text) {
   });
 }
 
+// ── CUSTOM RATES STORAGE ────────────────────────────────────────
+const RATES_FILE = path.join(__dirname, 'data', 'rates.json');
+
+function loadCustomRates() {
+  try { return JSON.parse(fs.readFileSync(RATES_FILE, 'utf8')); }
+  catch { return null; }
+}
+
+function saveCustomRates(rates) {
+  fs.writeFileSync(RATES_FILE, JSON.stringify(rates, null, 2));
+}
+
+// GET /api/admin/rates — Get custom rates
+app.get('/api/admin/rates', adminAuth, (req, res) => {
+  const rates = loadCustomRates();
+  res.json({ ok: true, rates });
+});
+
+// POST /api/admin/rates — Save custom rates
+app.post('/api/admin/rates', adminAuth, (req, res) => {
+  const { usdtBuy, usdtSell, useCustom } = req.body;
+  const rates = { usdtBuy: parseFloat(usdtBuy), usdtSell: parseFloat(usdtSell), useCustom: !!useCustom, updatedAt: new Date().toISOString() };
+  saveCustomRates(rates);
+  priceCache = null; // clear cache so next fetch uses new rates
+  res.json({ ok: true, rates });
+});
+
 // ── PRICE CACHE ─────────────────────────────────────────────────
 let priceCache = null;
 let priceCacheTime = 0;
@@ -106,10 +133,16 @@ app.get('/api/prices', async (req, res) => {
     const raw = await fetchLivePrices();
     const SPREAD = 0.005;
     const etbRate = raw.tether?.etb ?? 125;
+    // Check if admin has set custom rates
+    const customRates = loadCustomRates();
+    const useCustom = customRates && customRates.useCustom;
+    const usdtBuy  = useCustom ? customRates.usdtBuy  : parseFloat((etbRate * (1 + SPREAD)).toFixed(2));
+    const usdtSell = useCustom ? customRates.usdtSell : parseFloat((etbRate * (1 - SPREAD)).toFixed(2));
+
     priceCache = {
       usdt: {
-        buy:  parseFloat((etbRate * (1 + SPREAD)).toFixed(2)),
-        sell: parseFloat((etbRate * (1 - SPREAD)).toFixed(2)),
+        buy:  usdtBuy,
+        sell: usdtSell,
         change: raw.tether?.usd_24h_change ?? 0,
         unit: 'ETB'
       },

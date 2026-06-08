@@ -643,21 +643,71 @@
 
       <!-- ── CONTACT FORM (shown after amount entered) ── -->
       <div id="orderForm" style="display:none;margin-top:14px;border-top:1px solid rgba(255,255,255,0.07);padding-top:14px;">
+
+        <!-- BANK LOGOS SECTION -->
+        <div id="bankSection" style="margin-bottom:14px;">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'JetBrains Mono',monospace;margin-bottom:8px;">💳 ACCEPTED PAYMENT METHODS</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:16px;">🏦</span><span style="font-size:11px;font-weight:700;color:var(--text);">CBE</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:16px;">🏦</span><span style="font-size:11px;font-weight:700;color:var(--text);">Awash</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:16px;">🏦</span><span style="font-size:11px;font-weight:700;color:var(--text);">Dashen</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:16px;">🏦</span><span style="font-size:11px;font-weight:700;color:var(--text);">Abyssinia</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:16px;">🏦</span><span style="font-size:11px;font-weight:700;color:var(--text);">Wegagen</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:16px;">🏦</span><span style="font-size:11px;font-weight:700;color:var(--text);">NIB</span>
+            </div>
+            <div style="background:rgba(0,194,255,0.06);border:1px solid rgba(0,194,255,0.2);border-radius:8px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:16px;">📱</span><span style="font-size:11px;font-weight:700;color:var(--secondary);">Telebirr</span>
+            </div>
+          </div>
+          <div style="margin-top:8px;background:rgba(0,255,153,0.04);border:1px solid rgba(0,255,153,0.1);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted);">
+            📩 After submitting, our operator will send you the account details on Telegram.
+          </div>
+        </div>
+
+        <!-- CONTACT FIELDS -->
         <div style="font-size:11px;color:var(--muted);letter-spacing:1px;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">YOUR CONTACT DETAILS</div>
+
+        <!-- Name + Phone -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
           <div>
             <div style="font-size:10px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;">FULL NAME *</div>
             <input id="orderName" type="text" placeholder="Abebe Kebede" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" />
           </div>
           <div>
-            <div style="font-size:10px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;">PHONE / TELEGRAM *</div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;">PHONE NUMBER *</div>
             <input id="orderPhone" type="text" placeholder="+251 9XX XXX XXX" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" />
           </div>
         </div>
+
+        <!-- Telegram Username -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;">TELEGRAM USERNAME *</div>
+          <div style="position:relative;">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--primary);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;">@</span>
+            <input id="orderTelegram" type="text" placeholder="your_telegram" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px 10px 28px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" />
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;">We will contact you here to complete the trade</div>
+        </div>
+
+        <!-- Notes -->
         <div style="margin-bottom:12px;">
           <div style="font-size:10px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;">NOTES (optional)</div>
-          <textarea id="orderNotes" rows="2" placeholder="Preferred bank, wallet address, or any notes..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;resize:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'"></textarea>
+          <textarea id="orderNotes" rows="2" placeholder="Preferred bank, wallet address, or any other notes..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;resize:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'"></textarea>
         </div>
+
+        <!-- Min/Max warning -->
+        <div id="minMaxWarn" style="display:none;background:rgba(255,184,0,0.08);border:1px solid rgba(255,184,0,0.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--warn);margin-bottom:10px;"></div>
       </div>
 
       <button class="modal-cta disabled" id="modalCTA" onclick="submitOrder()">
@@ -1576,9 +1626,11 @@ function closeModal() {
     document.getElementById('orderSuccess').style.display = 'none';
     document.getElementById('orderName').value = '';
     document.getElementById('orderPhone').value = '';
+    document.getElementById('orderTelegram').value = '';
     document.getElementById('orderNotes').value = '';
     document.getElementById('orderName').style.borderColor = 'rgba(255,255,255,0.12)';
     document.getElementById('orderPhone').style.borderColor = 'rgba(255,255,255,0.12)';
+    document.getElementById('orderTelegram').style.borderColor = 'rgba(255,255,255,0.12)';
     // Show body elements again
     Array.from(document.querySelector('.modal-body').children).forEach(el => {
       if (el.id === 'orderSuccess') { el.style.display = 'none'; return; }
@@ -1661,15 +1713,35 @@ async function submitOrder() {
   const cta = document.getElementById('modalCTA');
   if (cta.classList.contains('disabled')) return;
 
-  const name  = document.getElementById('orderName').value.trim();
-  const phone = document.getElementById('orderPhone').value.trim();
-  const notes = document.getElementById('orderNotes').value.trim();
+  const name     = document.getElementById('orderName').value.trim();
+  const phone    = document.getElementById('orderPhone').value.trim();
+  const telegram = document.getElementById('orderTelegram').value.trim().replace(/^@/, '');
+  const notes    = document.getElementById('orderNotes').value.trim();
 
-  if (!name || !phone) {
-    document.getElementById('orderName').style.borderColor = name ? 'rgba(255,255,255,0.12)' : 'var(--danger)';
-    document.getElementById('orderPhone').style.borderColor = phone ? 'rgba(255,255,255,0.12)' : 'var(--danger)';
-    return;
+  // Validate required fields
+  let hasError = false;
+  document.getElementById('orderName').style.borderColor     = name     ? 'rgba(255,255,255,0.12)' : 'var(--danger)';
+  document.getElementById('orderPhone').style.borderColor    = phone    ? 'rgba(255,255,255,0.12)' : 'var(--danger)';
+  document.getElementById('orderTelegram').style.borderColor = telegram ? 'rgba(255,255,255,0.12)' : 'var(--danger)';
+  if (!name || !phone || !telegram) return;
+
+  // Min/max check against live limits
+  const limits = await fetchLimits();
+  const amt = _orderCalc.amount;
+  const warn = document.getElementById('minMaxWarn');
+  if (limits) {
+    if (limits.min && amt < limits.min) {
+      warn.style.display = 'block';
+      warn.textContent = `⚠ Minimum order is ${limits.min} ${_orderCalc.asset}`;
+      return;
+    }
+    if (limits.max && amt > limits.max) {
+      warn.style.display = 'block';
+      warn.textContent = `⚠ Maximum order is ${limits.max} ${_orderCalc.asset}`;
+      return;
+    }
   }
+  warn.style.display = 'none';
 
   cta.classList.add('disabled');
   document.getElementById('modalCTAText').textContent = 'Submitting…';
@@ -1678,22 +1750,16 @@ async function submitOrder() {
     const res = await fetch(API_BASE + '/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone, notes, ..._orderCalc })
+      body: JSON.stringify({ name, phone, telegram, notes, ..._orderCalc })
     });
     const json = await res.json();
     if (json.ok) {
-      // Show success
-      document.getElementById('modalBody') && (document.getElementById('orderForm').style.display = 'none');
       document.querySelector('.modal-body').style.opacity = '0';
       setTimeout(() => {
         document.querySelector('.modal-body').style.opacity = '1';
-        document.getElementById('orderSuccess').style.display = 'block';
-        document.querySelector('.modal-body > *:not(#orderSuccess)') && null;
-        // Hide everything except success
         Array.from(document.querySelector('.modal-body').children).forEach(el => {
-          if (el.id !== 'orderSuccess') el.style.display = 'none';
+          el.style.display = el.id === 'orderSuccess' ? 'block' : 'none';
         });
-        document.getElementById('orderSuccess').style.display = 'block';
       }, 200);
     } else {
       throw new Error(json.error || 'Unknown error');
@@ -1705,6 +1771,15 @@ async function submitOrder() {
       document.getElementById('modalCTAText').textContent = `✓ Submit Order — ${_orderCalc.amount} ${_orderCalc.asset}`;
     }, 3000);
   }
+}
+
+async function fetchLimits() {
+  try {
+    const res = await fetch(API_BASE + '/api/limits');
+    const d = await res.json();
+    if (d.ok) return d.limits;
+  } catch {}
+  return null;
 }
 
 function openModalFromCalc(mode) {

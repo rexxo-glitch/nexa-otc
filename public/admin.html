@@ -139,6 +139,44 @@ td { padding: 14px 16px; font-size: 13px; vertical-align: middle; }
       <div class="stat-card"><div class="stat-label">Cancelled</div><div class="stat-val red" id="s-cancelled">—</div></div>
     </div>
 
+    <!-- LIMITS EDITOR -->
+    <div class="section-hdr" style="margin-top:32px;">
+      <div class="section-title">Min / Max Order Limits</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:32px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;" id="limitsGrid">
+        <div>
+          <div style="font-size:11px;color:var(--primary);font-family:'JetBrains Mono',monospace;font-weight:700;margin-bottom:10px;">USDT (ETB)</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">MIN</div>
+          <input id="lim-usdt-min" type="number" placeholder="10" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;margin-bottom:8px;" />
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">MAX</div>
+          <input id="lim-usdt-max" type="number" placeholder="50000" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;" />
+        </div>
+        <div>
+          <div style="font-size:11px;color:#F7931A;font-family:'JetBrains Mono',monospace;font-weight:700;margin-bottom:10px;">BTC</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">MIN</div>
+          <input id="lim-btc-min" type="number" placeholder="0.0001" step="0.0001" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;margin-bottom:8px;" />
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">MAX</div>
+          <input id="lim-btc-max" type="number" placeholder="10" step="0.001" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;" />
+        </div>
+        <div>
+          <div style="font-size:11px;color:#627EEA;font-family:'JetBrains Mono',monospace;font-weight:700;margin-bottom:10px;">ETH</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">MIN</div>
+          <input id="lim-eth-min" type="number" placeholder="0.01" step="0.001" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;margin-bottom:8px;" />
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">MAX</div>
+          <input id="lim-eth-max" type="number" placeholder="100" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;" />
+        </div>
+        <div>
+          <div style="font-size:11px;color:#F3BA2F;font-family:'JetBrains Mono',monospace;font-weight:700;margin-bottom:10px;">BNB</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">MIN</div>
+          <input id="lim-bnb-min" type="number" placeholder="0.1" step="0.01" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;margin-bottom:8px;" />
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">MAX</div>
+          <input id="lim-bnb-max" type="number" placeholder="500" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;" />
+        </div>
+      </div>
+      <button onclick="saveLimits()" style="background:linear-gradient(135deg,var(--primary),var(--secondary));color:#000;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;border:none;cursor:pointer;">💾 Save Limits</button>
+    </div>
+
     <!-- RATE EDITOR -->
     <div class="section-hdr" style="margin-top:32px;">
       <div class="section-title">USDT Rate Control</div>
@@ -223,6 +261,7 @@ function doLogin() {
         document.getElementById('adminWrap').style.display = 'block';
         loadAll();
         loadRates();
+        loadLimitsAdmin();
       } else {
         document.getElementById('loginErr').style.display = 'block';
       }
@@ -291,6 +330,7 @@ function renderOrders() {
       <td>
         <div style="font-weight:700;">${esc(o.name)}</div>
         <div style="font-size:11px;color:var(--primary);font-family:'JetBrains Mono',monospace;">${esc(o.phone)}</div>
+        ${o.telegram ? `<div style="font-size:11px;color:var(--secondary);font-family:'JetBrains Mono',monospace;">@${esc(o.telegram)}</div>` : ''}
         ${o.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${esc(o.notes)}</div>` : ''}
       </td>
       <td style="font-family:'Orbitron',monospace;font-weight:700;font-size:13px;">${o.asset}</td>
@@ -351,6 +391,42 @@ function showToast(msg, type) {
   t.textContent = msg;
   t.className = `toast ${type} show`;
   setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── LIMITS ──
+async function loadLimitsAdmin() {
+  try {
+    const r = await fetch('/api/admin/limits', { headers: { 'x-admin-password': adminPw } });
+    const d = await r.json();
+    if (d.ok && d.limits) {
+      const l = d.limits;
+      document.getElementById('lim-usdt-min').value = l.usdt?.min || '';
+      document.getElementById('lim-usdt-max').value = l.usdt?.max || '';
+      document.getElementById('lim-btc-min').value  = l.btc?.min  || '';
+      document.getElementById('lim-btc-max').value  = l.btc?.max  || '';
+      document.getElementById('lim-eth-min').value  = l.eth?.min  || '';
+      document.getElementById('lim-eth-max').value  = l.eth?.max  || '';
+      document.getElementById('lim-bnb-min').value  = l.bnb?.min  || '';
+      document.getElementById('lim-bnb-max').value  = l.bnb?.max  || '';
+    }
+  } catch(e) {}
+}
+
+async function saveLimits() {
+  const limits = {
+    usdt: { min: parseFloat(document.getElementById('lim-usdt-min').value) || 0, max: parseFloat(document.getElementById('lim-usdt-max').value) || 999999 },
+    btc:  { min: parseFloat(document.getElementById('lim-btc-min').value)  || 0, max: parseFloat(document.getElementById('lim-btc-max').value)  || 999999 },
+    eth:  { min: parseFloat(document.getElementById('lim-eth-min').value)  || 0, max: parseFloat(document.getElementById('lim-eth-max').value)  || 999999 },
+    bnb:  { min: parseFloat(document.getElementById('lim-bnb-min').value)  || 0, max: parseFloat(document.getElementById('lim-bnb-max').value)  || 999999 },
+  };
+  const r = await fetch('/api/admin/limits', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPw },
+    body: JSON.stringify(limits)
+  });
+  const d = await r.json();
+  if (d.ok) showToast('✅ Limits saved!', 'ok');
+  else showToast('❌ Failed to save limits', 'err');
 }
 
 // ── RATES ──

@@ -153,10 +153,10 @@ app.post('/api/orders', async (req, res) => {
   const { name, phone, asset, type, amount, rate, total, unit, notes } = req.body;
   if (!name || !phone || !asset || !type || !amount) return res.status(400).json({ ok: false, error: 'Missing required fields' });
   const orders = loadOrders();
-  const order = { id: 'ORD-' + Date.now(), name: name.trim(), phone: phone.trim(), asset: asset.toUpperCase(), type: type.toLowerCase(), amount: parseFloat(amount), rate: parseFloat(rate) || 0, total: parseFloat(total) || 0, unit: unit || 'ETB', notes: (notes || '').trim(), status: 'pending', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+  const order = { id: 'ORD-' + Date.now(), name: name.trim(), phone: phone.trim(), telegram: (req.body.telegram || '').trim(), asset: asset.toUpperCase(), type: type.toLowerCase(), amount: parseFloat(amount), rate: parseFloat(rate) || 0, total: parseFloat(total) || 0, unit: unit || 'ETB', notes: (notes || '').trim(), status: 'pending', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
   orders.unshift(order); saveOrders(orders);
   const emoji = order.type === 'buy' ? '🟢' : '🔴';
-  const tgText = `${emoji} <b>NEW ${order.type.toUpperCase()} ORDER — NEXA OTC</b>\n\n🪪 <b>Order ID:</b> ${order.id}\n👤 <b>Name:</b> ${order.name}\n📱 <b>Phone:</b> ${order.phone}\n💱 <b>Asset:</b> ${order.asset}\n📊 <b>Amount:</b> ${order.amount} ${order.asset}\n💰 <b>Rate:</b> ${order.rate} ${order.unit}\n🧾 <b>Total:</b> ${order.total.toLocaleString()} ${order.unit}\n${order.notes ? `📝 <b>Notes:</b> ${order.notes}\n` : ''}\n⏰ ${new Date(order.createdAt).toLocaleString('en-ET', { timeZone: 'Africa/Addis_Ababa' })}\n📋 <b>Status:</b> PENDING`;
+  const tgText = `${emoji} <b>NEW ${order.type.toUpperCase()} ORDER — NEXA OTC</b>\n\n🪪 <b>Order ID:</b> ${order.id}\n👤 <b>Name:</b> ${order.name}\n📱 <b>Phone:</b> ${order.phone}\n✈️ <b>Telegram:</b> @${order.telegram}\n💱 <b>Asset:</b> ${order.asset}\n📊 <b>Amount:</b> ${order.amount} ${order.asset}\n💰 <b>Rate:</b> ${order.rate} ${order.unit}\n🧾 <b>Total:</b> ${order.total.toLocaleString()} ${order.unit}\n${order.notes ? `📝 <b>Notes:</b> ${order.notes}\n` : ''}\n⏰ ${new Date(order.createdAt).toLocaleString('en-ET', { timeZone: 'Africa/Addis_Ababa' })}\n📋 <b>Status:</b> PENDING`;
   try { await sendTelegramMessage(tgText); } catch {}
   res.json({ ok: true, order });
 });
@@ -197,7 +197,22 @@ app.post('/api/admin/rates', adminAuth, (req, res) => {
   res.json({ ok: true, rates });
 });
 
-app.get('/api/health', (req, res) => res.json({ ok: true, server: 'NEXA OTC Backend', time: new Date().toISOString() }));
+const LIMITS_FILE = path.join(__dirname, 'data', 'limits.json');
+function loadLimits() {
+  try { return JSON.parse(fs.readFileSync(LIMITS_FILE, 'utf8')); }
+  catch { return { usdt: { min: 10, max: 50000 }, btc: { min: 0.0001, max: 10 }, eth: { min: 0.01, max: 100 }, bnb: { min: 0.1, max: 500 } }; }
+}
+function saveLimits(l) { fs.writeFileSync(LIMITS_FILE, JSON.stringify(l, null, 2)); }
+
+app.get('/api/limits', (req, res) => res.json({ ok: true, limits: loadLimits() }));
+
+app.post('/api/admin/limits', adminAuth, (req, res) => {
+  const limits = req.body;
+  saveLimits(limits);
+  res.json({ ok: true, limits });
+});
+
+app.get('/api/admin/limits', adminAuth, (req, res) => res.json({ ok: true, limits: loadLimits() }));
 
 app.listen(PORT, () => {
   console.log(`\n🚀 NEXA OTC Backend running on http://localhost:${PORT}`);

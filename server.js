@@ -28,35 +28,25 @@ function loadOrders() {
   try { return JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf8')); }
   catch { return []; }
 }
-function saveOrders(orders) {
-  fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
-}
+function saveOrders(o) { fs.writeFileSync(ORDERS_FILE, JSON.stringify(o, null, 2)); }
 function loadCustomRates() {
   try { return JSON.parse(fs.readFileSync(RATES_FILE, 'utf8')); }
   catch { return null; }
 }
-function saveCustomRates(rates) {
-  fs.writeFileSync(RATES_FILE, JSON.stringify(rates, null, 2));
-}
+function saveCustomRates(r) { fs.writeFileSync(RATES_FILE, JSON.stringify(r, null, 2)); }
 
 function sendTelegramMessage(text) {
   return new Promise((resolve, reject) => {
     if (!TG_BOT_TOKEN || !TG_CHAT_ID) return resolve({ ok: false });
     const body = JSON.stringify({ chat_id: TG_CHAT_ID, text, parse_mode: 'HTML' });
-    const options = {
-      hostname: 'api.telegram.org',
-      path: `/bot${TG_BOT_TOKEN}/sendMessage`,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
-    };
+    const options = { hostname: 'api.telegram.org', path: `/bot${TG_BOT_TOKEN}/sendMessage`, method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } };
     const req = https.request(options, res => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve({ ok: false }); } });
     });
     req.on('error', reject);
-    req.write(body);
-    req.end();
+    req.write(body); req.end();
   });
 }
 
@@ -66,36 +56,69 @@ function adminAuth(req, res, next) {
   next();
 }
 
-// ── PRICE FETCHING (using Binance public API — no key needed, never blocked) ──
+// ── PRICE FETCHING ──────────────────────────────────────────────
 let priceCache = null;
 let priceCacheTime = 0;
-const CACHE_TTL = 30 * 1000;
+const CACHE_TTL = 60 * 1000; // 60 seconds
 
-function fetchJSON(hostname, path) {
+function fetchJSON(hostname, urlPath, headers) {
   return new Promise((resolve, reject) => {
-    const options = { hostname, path, method: 'GET', headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' } };
+    const options = { hostname, path: urlPath, method: 'GET', headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', ...(headers || {}) } };
     const req = https.request(options, res => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => { try { resolve(JSON.parse(data)); } catch { reject(new Error('Parse error')); } });
     });
     req.on('error', reject);
-    req.setTimeout(8000, () => { req.destroy(); reject(new Error('Timeout')); });
+    req.setTimeout(10000, () => { req.destroy(); reject(new Error('Timeout')); });
     req.end();
   });
 }
 
-async function fetchLivePrices() {
-  // Binance public API — free, reliable, no API key needed
-  const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
-  const results = await Promise.all(
-    symbols.map(s => fetchJSON('api.binance.com', `/api/v3/ticker/24hr?symbol=${s}`))
-  );
+// Try CoinCap API (very reliable, no key needed)
+async function fetchFromCoinCap() {
+  const ids = ['bitcoin', 'ethereum', 'binance-coin'];
+  const results = await Promise.all(ids.map(id => fetchJSON('api.coincap.io', `/v2/assets/${id}`)));
   return {
-    btc: { price: parseFloat(results[0].lastPrice), change: parseFloat(results[0].priceChangePercent) },
-    eth: { price: parseFloat(results[1].lastPrice), change: parseFloat(results[1].priceChangePercent) },
-    bnb: { price: parseFloat(results[2].lastPrice), change: parseFloat(results[2].priceChangePercent) },
+    btc: { price: parseFloat(results[0].data.priceUsd), change: parseFloat(results[0].data.changePercent24Hr) },
+    eth: { price: parseFloat(results[1].data.priceUsd), change: parseFloat(results[1].data.changePercent24Hr) },
+    bnb: { price: parseFloat(results[2].data.priceUsd), change: parseFloat(results[2].data.changePercent24Hr) },
   };
+}
+
+// Try Kraken as backup
+async function fetchFromKraken() {
+  const pairs = { btc: 'XBTUSD', eth: 'ETHUSD', bnb: 'BNBUSD' };
+  const [btcData, ethData] = await Promise.all([
+    fetchJSON('api.kraken.com', '/0/public/Ticker?pair=XBTUSD'),
+    fetchJSON('api.kraken.com', '/0/public/Ticker?pair=ETHUSD'),
+  ]);
+  const btcPrice = parseFloat(Object.values(btcData.result)[0].c[0]);
+  const ethPrice = parseFloat(Object.values(ethData.result)[0].c[0]);
+  return {
+    btc: { price: btcPrice, change: 0 },
+    eth: { price: ethPrice, change: 0 },
+    bnb: { price: 650, change: 0 }, // fallback for BNB
+  };
+}
+
+async function fetchLivePrices() {
+  try {
+    console.log('Trying CoinCap...');
+    const data = await fetchFromCoinCap();
+    if (data.btc.price > 0) { console.log('CoinCap OK, BTC:', data.btc.price); return data; }
+    throw new Error('Invalid data');
+  } catch(e) {
+    console.log('CoinCap failed:', e.message, '— trying Kraken...');
+    try {
+      const data = await fetchFromKraken();
+      if (data.btc.price > 0) { console.log('Kraken OK, BTC:', data.btc.price); return data; }
+      throw new Error('Invalid data');
+    } catch(e2) {
+      console.log('Kraken failed:', e2.message, '— using fallback prices');
+      return { btc: { price: 105000, change: 0 }, eth: { price: 2500, change: 0 }, bnb: { price: 650, change: 0 } };
+    }
+  }
 }
 
 app.get('/api/prices', async (req, res) => {
@@ -109,12 +132,11 @@ app.get('/api/prices', async (req, res) => {
     const defaultEtb = 184;
     const usdtBuy  = useCustom ? customRates.usdtBuy  : defaultEtb * (1 + SPREAD);
     const usdtSell = useCustom ? customRates.usdtSell : defaultEtb * (1 - SPREAD);
-
     priceCache = {
-      usdt: { buy: parseFloat(usdtBuy.toFixed(2)),  sell: parseFloat(usdtSell.toFixed(2)), change: 0, unit: 'ETB' },
-      btc:  { buy: parseFloat((live.btc.price * (1 + SPREAD)).toFixed(2)), sell: parseFloat((live.btc.price * (1 - SPREAD)).toFixed(2)), change: live.btc.change, unit: 'USD' },
-      eth:  { buy: parseFloat((live.eth.price * (1 + SPREAD)).toFixed(2)), sell: parseFloat((live.eth.price * (1 - SPREAD)).toFixed(2)), change: live.eth.change, unit: 'USD' },
-      bnb:  { buy: parseFloat((live.bnb.price * (1 + SPREAD)).toFixed(2)), sell: parseFloat((live.bnb.price * (1 - SPREAD)).toFixed(2)), change: live.bnb.change, unit: 'USD' },
+      usdt: { buy: parseFloat(usdtBuy.toFixed(2)), sell: parseFloat(usdtSell.toFixed(2)), change: 0, unit: 'ETB' },
+      btc:  { buy: parseFloat((live.btc.price * (1 + SPREAD)).toFixed(2)), sell: parseFloat((live.btc.price * (1 - SPREAD)).toFixed(2)), change: parseFloat(live.btc.change.toFixed(2)), unit: 'USD' },
+      eth:  { buy: parseFloat((live.eth.price * (1 + SPREAD)).toFixed(2)), sell: parseFloat((live.eth.price * (1 - SPREAD)).toFixed(2)), change: parseFloat(live.eth.change.toFixed(2)), unit: 'USD' },
+      bnb:  { buy: parseFloat((live.bnb.price * (1 + SPREAD)).toFixed(2)), sell: parseFloat((live.bnb.price * (1 - SPREAD)).toFixed(2)), change: parseFloat(live.bnb.change.toFixed(2)), unit: 'USD' },
       etbRate: useCustom ? customRates.usdtBuy : defaultEtb,
       fetchedAt: new Date().toISOString()
     };
@@ -132,17 +154,14 @@ app.post('/api/orders', async (req, res) => {
   if (!name || !phone || !asset || !type || !amount) return res.status(400).json({ ok: false, error: 'Missing required fields' });
   const orders = loadOrders();
   const order = { id: 'ORD-' + Date.now(), name: name.trim(), phone: phone.trim(), asset: asset.toUpperCase(), type: type.toLowerCase(), amount: parseFloat(amount), rate: parseFloat(rate) || 0, total: parseFloat(total) || 0, unit: unit || 'ETB', notes: (notes || '').trim(), status: 'pending', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-  orders.unshift(order);
-  saveOrders(orders);
+  orders.unshift(order); saveOrders(orders);
   const emoji = order.type === 'buy' ? '🟢' : '🔴';
   const tgText = `${emoji} <b>NEW ${order.type.toUpperCase()} ORDER — NEXA OTC</b>\n\n🪪 <b>Order ID:</b> ${order.id}\n👤 <b>Name:</b> ${order.name}\n📱 <b>Phone:</b> ${order.phone}\n💱 <b>Asset:</b> ${order.asset}\n📊 <b>Amount:</b> ${order.amount} ${order.asset}\n💰 <b>Rate:</b> ${order.rate} ${order.unit}\n🧾 <b>Total:</b> ${order.total.toLocaleString()} ${order.unit}\n${order.notes ? `📝 <b>Notes:</b> ${order.notes}\n` : ''}\n⏰ ${new Date(order.createdAt).toLocaleString('en-ET', { timeZone: 'Africa/Addis_Ababa' })}\n📋 <b>Status:</b> PENDING`;
   try { await sendTelegramMessage(tgText); } catch {}
   res.json({ ok: true, order });
 });
 
-app.get('/api/admin/orders', adminAuth, (req, res) => {
-  res.json({ ok: true, orders: loadOrders() });
-});
+app.get('/api/admin/orders', adminAuth, (req, res) => res.json({ ok: true, orders: loadOrders() }));
 
 app.patch('/api/admin/orders/:id', adminAuth, (req, res) => {
   const { status, adminNote } = req.body;
@@ -169,9 +188,7 @@ app.get('/api/admin/stats', adminAuth, (req, res) => {
   res.json({ ok: true, stats: { total: orders.length, pending: orders.filter(o=>o.status==='pending').length, confirmed: orders.filter(o=>o.status==='confirmed').length, completed: orders.filter(o=>o.status==='completed').length, cancelled: orders.filter(o=>o.status==='cancelled').length } });
 });
 
-app.get('/api/admin/rates', adminAuth, (req, res) => {
-  res.json({ ok: true, rates: loadCustomRates() });
-});
+app.get('/api/admin/rates', adminAuth, (req, res) => res.json({ ok: true, rates: loadCustomRates() }));
 
 app.post('/api/admin/rates', adminAuth, (req, res) => {
   const { usdtBuy, usdtSell, useCustom } = req.body;

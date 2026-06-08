@@ -66,14 +66,14 @@ function adminAuth(req, res, next) {
   next();
 }
 
+// ── PRICE FETCHING (using Binance public API — no key needed, never blocked) ──
 let priceCache = null;
 let priceCacheTime = 0;
 const CACHE_TTL = 30 * 1000;
 
-async function fetchLivePrices() {
+function fetchJSON(hostname, path) {
   return new Promise((resolve, reject) => {
-    const url = '/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,tether&vs_currencies=usd,etb&include_24hr_change=true';
-    const options = { hostname: 'api.coingecko.com', path: url, method: 'GET', headers: { 'Accept': 'application/json', 'User-Agent': 'NEXA-OTC/1.0' } };
+    const options = { hostname, path, method: 'GET', headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' } };
     const req = https.request(options, res => {
       let data = '';
       res.on('data', chunk => data += chunk);
@@ -85,27 +85,43 @@ async function fetchLivePrices() {
   });
 }
 
+async function fetchLivePrices() {
+  // Binance public API — free, reliable, no API key needed
+  const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
+  const results = await Promise.all(
+    symbols.map(s => fetchJSON('api.binance.com', `/api/v3/ticker/24hr?symbol=${s}`))
+  );
+  return {
+    btc: { price: parseFloat(results[0].lastPrice), change: parseFloat(results[0].priceChangePercent) },
+    eth: { price: parseFloat(results[1].lastPrice), change: parseFloat(results[1].priceChangePercent) },
+    bnb: { price: parseFloat(results[2].lastPrice), change: parseFloat(results[2].priceChangePercent) },
+  };
+}
+
 app.get('/api/prices', async (req, res) => {
   const now = Date.now();
   if (priceCache && (now - priceCacheTime) < CACHE_TTL) return res.json({ ok: true, cached: true, data: priceCache });
   try {
-    const raw = await fetchLivePrices();
+    const live = await fetchLivePrices();
     const SPREAD = 0.005;
-    const etbRate = raw.tether?.etb ?? 125;
     const customRates = loadCustomRates();
     const useCustom = customRates && customRates.useCustom;
-    const usdtBuy  = useCustom ? customRates.usdtBuy  : parseFloat((etbRate * (1 + SPREAD)).toFixed(2));
-    const usdtSell = useCustom ? customRates.usdtSell : parseFloat((etbRate * (1 - SPREAD)).toFixed(2));
+    const defaultEtb = 184;
+    const usdtBuy  = useCustom ? customRates.usdtBuy  : defaultEtb * (1 + SPREAD);
+    const usdtSell = useCustom ? customRates.usdtSell : defaultEtb * (1 - SPREAD);
+
     priceCache = {
-      usdt: { buy: usdtBuy, sell: usdtSell, change: raw.tether?.usd_24h_change ?? 0, unit: 'ETB' },
-      btc:  { buy: parseFloat((raw.bitcoin?.usd * (1 + SPREAD)).toFixed(2)), sell: parseFloat((raw.bitcoin?.usd * (1 - SPREAD)).toFixed(2)), change: raw.bitcoin?.usd_24h_change ?? 0, unit: 'USD' },
-      eth:  { buy: parseFloat((raw.ethereum?.usd * (1 + SPREAD)).toFixed(2)), sell: parseFloat((raw.ethereum?.usd * (1 - SPREAD)).toFixed(2)), change: raw.ethereum?.usd_24h_change ?? 0, unit: 'USD' },
-      bnb:  { buy: parseFloat((raw.binancecoin?.usd * (1 + SPREAD)).toFixed(2)), sell: parseFloat((raw.binancecoin?.usd * (1 - SPREAD)).toFixed(2)), change: raw.binancecoin?.usd_24h_change ?? 0, unit: 'USD' },
-      etbRate, fetchedAt: new Date().toISOString()
+      usdt: { buy: parseFloat(usdtBuy.toFixed(2)),  sell: parseFloat(usdtSell.toFixed(2)), change: 0, unit: 'ETB' },
+      btc:  { buy: parseFloat((live.btc.price * (1 + SPREAD)).toFixed(2)), sell: parseFloat((live.btc.price * (1 - SPREAD)).toFixed(2)), change: live.btc.change, unit: 'USD' },
+      eth:  { buy: parseFloat((live.eth.price * (1 + SPREAD)).toFixed(2)), sell: parseFloat((live.eth.price * (1 - SPREAD)).toFixed(2)), change: live.eth.change, unit: 'USD' },
+      bnb:  { buy: parseFloat((live.bnb.price * (1 + SPREAD)).toFixed(2)), sell: parseFloat((live.bnb.price * (1 - SPREAD)).toFixed(2)), change: live.bnb.change, unit: 'USD' },
+      etbRate: useCustom ? customRates.usdtBuy : defaultEtb,
+      fetchedAt: new Date().toISOString()
     };
     priceCacheTime = now;
     res.json({ ok: true, cached: false, data: priceCache });
   } catch (err) {
+    console.error('Price fetch error:', err.message);
     if (priceCache) return res.json({ ok: true, cached: true, stale: true, data: priceCache });
     res.status(503).json({ ok: false, error: 'Price service unavailable' });
   }
@@ -125,8 +141,7 @@ app.post('/api/orders', async (req, res) => {
 });
 
 app.get('/api/admin/orders', adminAuth, (req, res) => {
-  const orders = loadOrders();
-  res.json({ ok: true, count: orders.length, orders });
+  res.json({ ok: true, orders: loadOrders() });
 });
 
 app.patch('/api/admin/orders/:id', adminAuth, (req, res) => {
@@ -145,14 +160,13 @@ app.delete('/api/admin/orders/:id', adminAuth, (req, res) => {
   let orders = loadOrders();
   const idx = orders.findIndex(o => o.id === req.params.id);
   if (idx === -1) return res.status(404).json({ ok: false, error: 'Not found' });
-  orders.splice(idx, 1);
-  saveOrders(orders);
+  orders.splice(idx, 1); saveOrders(orders);
   res.json({ ok: true });
 });
 
 app.get('/api/admin/stats', adminAuth, (req, res) => {
   const orders = loadOrders();
-  res.json({ ok: true, stats: { total: orders.length, pending: orders.filter(o=>o.status==='pending').length, confirmed: orders.filter(o=>o.status==='confirmed').length, completed: orders.filter(o=>o.status==='completed').length, cancelled: orders.filter(o=>o.status==='cancelled').length, buyCount: orders.filter(o=>o.type==='buy').length, sellCount: orders.filter(o=>o.type==='sell').length } });
+  res.json({ ok: true, stats: { total: orders.length, pending: orders.filter(o=>o.status==='pending').length, confirmed: orders.filter(o=>o.status==='confirmed').length, completed: orders.filter(o=>o.status==='completed').length, cancelled: orders.filter(o=>o.status==='cancelled').length } });
 });
 
 app.get('/api/admin/rates', adminAuth, (req, res) => {
@@ -162,8 +176,7 @@ app.get('/api/admin/rates', adminAuth, (req, res) => {
 app.post('/api/admin/rates', adminAuth, (req, res) => {
   const { usdtBuy, usdtSell, useCustom } = req.body;
   const rates = { usdtBuy: parseFloat(usdtBuy), usdtSell: parseFloat(usdtSell), useCustom: !!useCustom, updatedAt: new Date().toISOString() };
-  saveCustomRates(rates);
-  priceCache = null;
+  saveCustomRates(rates); priceCache = null;
   res.json({ ok: true, rates });
 });
 
@@ -171,5 +184,5 @@ app.get('/api/health', (req, res) => res.json({ ok: true, server: 'NEXA OTC Back
 
 app.listen(PORT, () => {
   console.log(`\n🚀 NEXA OTC Backend running on http://localhost:${PORT}`);
-  console.log(`📡 Telegram bot: ${TG_BOT_TOKEN ? '✅ Configured' : '⚠ Not set'}\n`);
+  console.log(`📡 Telegram: ${TG_BOT_TOKEN ? '✅' : '⚠ Not set'}\n`);
 });
